@@ -34,9 +34,10 @@ class LoginView(APIView):
             # ustaw ciasteczko
             response.set_cookie(key="access_token", value=access_token,
                                 # aby JavaScript nie miał dostępu
-                                httponly=True, secure=True, samesite="Strict")
+                                httponly=True, secure=True, samesite="None")
+            
             response.set_cookie(key="refresh_token", value=str(refresh),
-                                httponly=True, secure=True, samesite="Strict")
+                                httponly=True, secure=True, samesite="None")
             return response
         return Response( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
     
@@ -75,7 +76,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 
             response = Response({"message":"Acces token refreshed succesfully"}, status=status.HTTP_200_OK)
             response.set_cookie(key="access_token", value=access_token,
-                                httponly=True, secure=True, samesite="Strict")
+                                httponly=True, secure=True, samesite="None") # None lub Strict
             return response
         
         except InvalidToken:
