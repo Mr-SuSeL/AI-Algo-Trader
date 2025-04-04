@@ -14,6 +14,7 @@ export const registerUser = async (email, username, password) => {
     }
 }
 
+/*
 export const loginUser = async (email, password) => {
     
 }
@@ -21,3 +22,4 @@ export const loginUser = async (email, password) => {
 export const logoutrUser = async (params) => {
     
 }
+    */
