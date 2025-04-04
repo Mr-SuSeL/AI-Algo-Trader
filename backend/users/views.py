@@ -1,7 +1,7 @@
 
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CustomUserSerializer
+from .serializers import CustomUserSerializer, RegisterUserSerializer
 
 class UserInfoView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -10,4 +10,6 @@ class UserInfoView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
     
+class UserRegistrationView(CreateAPIView):
+    serializer_class = RegisterUserSerializer
 
