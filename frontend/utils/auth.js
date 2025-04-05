@@ -14,11 +14,21 @@ export const registerUser = async (email, username, password) => {
     }
 }
 
-/*
+
 export const loginUser = async (email, password) => {
-    
+    try {
+        const response = await axios.post(`${API_URL}login/`, {email, password},
+            {withCredentials: true} 
+        )
+        return response.data;
+    }
+    catch(e) {
+        throw new Error("log in failed!")
+    }
 }
 
+
+/*
 export const logoutrUser = async (params) => {
     
 }

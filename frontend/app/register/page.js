@@ -20,7 +20,7 @@ export default function registerPage() {
             alert("User created!")
         }
         catch(e) {
-            alert("User creation failed!" + e)
+            alert("User creation failed! " + e)
         }
     }
 
