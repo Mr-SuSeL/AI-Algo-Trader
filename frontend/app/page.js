@@ -1,22 +1,43 @@
 "use client"
-import React, { useState } from 'react'
-import { logoutUser } from '@/utils/auth';
+import React, { useState, useEffect } from 'react'
+import { logoutUser, getUserInfo, refreshToken } from '@/utils/auth';
 
 export default function Home() {
+	const [user, setUser] = useState(null);
+	
+	useEffect(() => {
+		const getUser = async () => {
+			const userDetails = await getUserInfo();
+			if (userDetails) {
+				setUser(userDetails);
+			}
+		};
+		getUser();
+	}, []);
 
-  const [user, setUser] = useState(null)
+	
 
-  const handleLogout = async () => {
-    await logoutUser();
+	const handleLogout = async () => {
+		await logoutUser();
+	};
+
+  const handleRefresh = async () => {
+    await refreshToken();
   }
+	return (
+		<div className="min-h-screen bg-gray-100 items-center flex flex-col justify-center">
+			<div className="bg-gray-600 p-8 flex flex-col rounded-lg">
+			{user ? <h1>Hi, {user.username}</h1> : <h1>Welcome stranger!</h1>}
 
-  return (
-    <div className="fixed right-[20%]">
-      <button onClick={handleLogout}
-        className="bg-red-500 hover:bg-red-400 text-white font-medium py-2 px-4 rounded transition-colors cursor-pointer"         
-      >
-      Logout
-      </button>
-    </div>
-  )
+			<button className="bg-blue-400 p-1 rounded-sm m-1 cursor-pointer" onClick={handleLogout}
+      type="submit"
+      >Logout</button>
+			
+			<button className="bg-blue-400 p-1 rounded-sm m-1 cursor-pointer" 
+      onClick={handleRefresh}
+      type="submit"
+      >refresh token</button>
+			</div>
+		</div>
+	);
 }
