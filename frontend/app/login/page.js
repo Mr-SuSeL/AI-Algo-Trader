@@ -25,7 +25,7 @@ export default function LoginPage() {
             await loginUser(email, password)
             showToast("User logged in successfully!", "success")
         } catch (e) {
-            showToast(`Login failed: ${e.message}`, "error")
+            showToast(`Login failed: ${e}`, "error")
         }
     }
 
