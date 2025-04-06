@@ -143,5 +143,9 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
 }
 
-CORS_ALLOW_ALL_ORIGINS = True # usuń na produkcję
+#CORS_ALLOW_ALL_ORIGINS = True # usuń na produkcję
 CORS_ALLOW_CREDENTIALS = True # cors dla ciasteczek
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",    # Adres Twojego Next.js
+    #"https://twoja-domena.com", # Produkcja
+]
