@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { logoutUser, getUserInfo, refreshToken } from '@/utils/auth';
+import { getUserInfo } from '@/utils/auth';
+import Navbar from '../components/Navbar'; // Upewnij się, że ścieżka jest poprawna
 
 export default function Home() {
 	const [user, setUser] = useState(null);
@@ -15,28 +16,13 @@ export default function Home() {
 		getUser();
 	}, []);
 
-	
 
-	const handleLogout = async () => {
-		await logoutUser();
-	};
-
-  const handleRefresh = async () => {
-    await refreshToken();
-  }
 	return (
-		<div className="min-h-screen bg-gray-100 items-center flex flex-col justify-center">
-			<div className="bg-gray-600 p-8 flex flex-col rounded-lg">
-			{user ? <h1>Hi, {user.username}</h1> : <h1>Welcome stranger!</h1>}
+		<div>
+			<Navbar /> {/* Dodaj navbar */}
 
-			<button className="bg-blue-400 p-1 rounded-sm m-1 cursor-pointer" onClick={handleLogout}
-      type="submit"
-      >Logout</button>
-			
-			<button className="bg-blue-400 p-1 rounded-sm m-1 cursor-pointer" 
-      onClick={handleRefresh}
-      type="submit"
-      >refresh token</button>
+			<div className="m-10">
+				{user ? <h1>Hi, {user.username}</h1> : <h1>Welcome stranger!</h1>}
 			</div>
 		</div>
 	);
