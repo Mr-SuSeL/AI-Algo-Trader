@@ -1,29 +1,40 @@
-"use client"
-import React, { useState, useEffect } from 'react'
-import { getUserInfo } from '@/utils/auth';
-import Navbar from '../components/Navbar'; // Upewnij się, że ścieżka jest poprawna
+"use client"; // Ważne dla użycia hooków Reacta
+
+import React, { useContext } from 'react'; // <-- Zmienione: Importujemy useContext
+import Navbar from '../components/Navbar';
+import { AuthContext } from '../store/AuthContext'; // <-- Zmienione: Importujemy TYLKO AuthContext
 
 export default function Home() {
-	const [user, setUser] = useState(null);
-	
-	useEffect(() => {
-		const getUser = async () => {
-			const userDetails = await getUserInfo();
-			if (userDetails) {
-				setUser(userDetails);
-			}
-		};
-		getUser();
-	}, []);
+    // Używamy useContext, aby uzyskać dostęp do stanu uwierzytelnienia z AuthContext
+    const { user, isLoggedIn, isLoading } = useContext(AuthContext);
 
+    // Usuwamy useState i useEffect, ponieważ AuthContext już zarządza stanem user i isLoading
+    // const [user, setUser] = useState(null);
+    // useEffect(() => { ... });
 
-	return (
-		<div>
-			<Navbar /> {/* Dodaj navbar */}
+    // Wyświetl komunikat ładowania, jeśli AuthContext jeszcze się inicjalizuje
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center">
+                <Navbar /> {/* Navbar może być renderowany także podczas ładowania */}
+                <div className="m-10">
+                    <h1>Ładowanie autoryzacji...</h1>
+                </div>
+            </div>
+        );
+    }
 
-			<div className="m-10">
-				{user ? <h1>Hi, {user.username}</h1> : <h1>Welcome stranger!</h1>}
-			</div>
-		</div>
-	);
+    return (
+        <div>
+            {/* Navbar również będzie miał dostęp do AuthContext, jeśli używa useContext(AuthContext) */}
+            <Navbar />
+            <div className="m-10">
+                {isLoggedIn && user ? ( // Sprawdzamy isLoggedIn ORAZ czy obiekt user istnieje
+                    <h1>Cześć, {user.username}!</h1>
+                ) : (
+                    <h1>Witaj nieznajomy!</h1>
+                )}
+            </div>
+        </div>
+    );
 }

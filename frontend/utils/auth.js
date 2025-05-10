@@ -54,6 +54,7 @@ export const getUserInfo = async () => {
     }
     catch (e) {
         throw new Error("Getting user failed!");
+        //console.error("Getting user failed!", e);
     }
     
 }
