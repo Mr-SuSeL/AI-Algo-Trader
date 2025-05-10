@@ -39,6 +39,7 @@ export const logoutUser = async () => {
         return response.data;
     }
     catch (e) {
+        console.error("Szczegóły błędu w utils/auth.js (logoutUser):", e.response || e.message || e);
         throw new Error("Logout failed!");
     }
     
