@@ -3,152 +3,151 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { loginUser, logoutUser, refreshToken, getUserInfo } from '@/utils/auth';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
-// Definicja kontekstu - używana tylko gdy brak Providera
-export const AuthContext = createContext({
-    isLoggedIn: false,
-    user: null,
-    isLoading: true,
-    login: async () => {}, 
-    logout: async () => {},
-    refreshToken: async () => {},
-    fetchUserInfo: async () => {},
-});
+export const AuthContext = createContext(null);
 
-// Komponent Provider, który TRZYMA STAN i INTEGRUJE SIĘ Z API
 export const AuthProvider = ({ children }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [csrfToken, setCsrfToken] = useState(null); // <-- DODAJ STAN DLA CSRF TOKENA
     const router = useRouter();
 
-    // Ta funkcja próbuje pobrać dane usera. Jeśli się uda, użytkownik jest zalogowany.
-    // Jeśli API zwróci błąd (np. 401/403), oznacza to, że tokeny są nieważne/brak ich, więc użytkownik jest wylogowany.
-    const fetchUserInfo = async () => {
-         try {
-             // isLoading = true; // Możesz dodać lokalne ładowanie w tej funkcji, ale główny isLoading Providera wystarczy
-             const userData = await getUserInfo(); // z API z utils/auth.js, jeśli się powiedzie, cookie było ważne
+    // Funkcja do pobierania informacji o użytkowniku i inicjalnego CSRF
+    const fetchInitialData = async () => {
+        try {
+            if (!csrfToken) {
+                // ZMIEŃ TO NA LOCALHOST
+                await axios.get(`http://localhost:8000/api/users/csrf-token/`, { withCredentials: true });
+                const initialCsrf = getCookie('csrftoken');
+                if (initialCsrf) {
+                    setCsrfToken(initialCsrf);
+                    console.log("Initial CSRF token obtained and set in state:", initialCsrf);
+                } else {
+                    console.warn("CSRF token not found after initial fetch.");
+                }
+            }
 
-             setUser(userData);
-             setIsLoggedIn(true);
-             // isLoading = false;
-             return userData; 
-         } catch (error) {
-             // Jeśli linia powyżej RZUCI BŁĄD (np. 401/403 od API), cookie było nieważne/brak go:
-             console.error("Auth check failed. User is not logged in.", error);
-             setIsLoggedIn(false);
-             setUser(null);
-             // isLoading = false;
-         }
+            // Następnie spróbuj pobrać info o użytkowniku
+            const userData = await getUserInfo(); // getUserInfo nie potrzebuje już CSRF, bo jest w kontekście
+            setUser(userData.user);
+            setIsLoggedIn(true);
+            console.log("User info fetched successfully:", userData.user);
+
+        } catch (error) {
+            console.error("Auth check failed. User is not logged in or CSRF issue:", error);
+            setIsLoggedIn(false);
+            setUser(null);
+            setCsrfToken(null); // Wyczyść CSRF jeśli nie udało się uwierzytelnić
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    // Funkcja do ZALOGOWANIA
+    // Zmieniamy wywołania loginUser, logoutUser, refreshToken
+    // Będą one teraz używać csrftoken ze stanu kontekstu
+
     const login = async (email, password) => {
         try {
-            setIsLoading(true);
-            // Wysyła dane do endpointu z danymi do logowania, używa axios i powinna otrzymać/ustawić cookies)
-            await loginUser(email, password);
-
-            // odczytujemy  ustawione cookies i aktualizujemy isLoggedIn/user
-            await fetchUserInfo();
-
-            console.log("Login successful. State updated.");
-
+            // Upewnij się, że csrfToken jest dostępny przed próbą logowania
+            if (!csrfToken) {
+                console.error("CSRF token is not available in AuthContext state.");
+                throw new Error("Security error: CSRF token missing.");
+            }
+            const responseData = await loginUser(email, password, csrfToken); // Przekaż csrfToken
+            setUser(responseData.user);
+            setIsLoggedIn(true);
+            console.log("Login successful, user set:", responseData.user);
+            router.push('/');
         } catch (error) {
-             console.error("Login failed:", error);
-             setIsLoggedIn(false);
-             setUser(null);
-             throw error; 
-        } finally {
-             setIsLoading(false);
+            console.error("Login failed in AuthContext:", error);
+            setUser(null);
+            setIsLoggedIn(false);
+            throw error;
         }
     };
 
-    // Funkcja do WYLOGOWANIA
     const logout = async () => {
         try {
-            setIsLoading(true);
-            // strzał do API celem wylogowania
-            await logoutUser();
-
-             // teraz odczytamy status ustawiając BRAK cookies i aktualizując isLoggedIn=false/user=null
-            await fetchUserInfo(); // Sprawdzamy status po wylogowaniu
-            console.log("Logout successful. State updated.");
-
+            if (!csrfToken) { // Również sprawdź CSRF przed wylogowaniem
+                console.warn("CSRF token missing for logout, proceeding without header.");
+                // Możesz tu wymusić wylogowanie bez CSRF, jeśli to krytyczne, lub rzucić błąd
+            }
+            await logoutUser(csrfToken); // Przekaż csrfToken
+            setUser(null);
+            setIsLoggedIn(false);
+            setCsrfToken(null); // Wyczyść CSRF po wylogowaniu
+            console.log("User logged out successfully.");
+            router.push('/login'); // Przekieruj na stronę logowania
         } catch (error) {
-             console.error("Logout failed:", error);
-             // Nawet jeśli API wylogowania nie zadziałało, po stronie klienta aktualizujemy stan
-             // fetchUserInfo() i tak ustawi isLoggedIn=false, bo cookies prawdopodobnie nie działają
-             await fetchUserInfo(); // Mimo błędu API, zaktualizuj stan frontendu
-             throw error; // Przekaż błąd dalej
-        } finally {
-             setIsLoading(false);
-             router.push('/login'); // Przekierowanie po wylogowaniu na stronę logowania (a może główną?)
+            console.error("Logout failed in AuthContext:", error);
+            // Nadal wyczyść stan frontendu, nawet jeśli backend zwrócił błąd
+            setUser(null);
+            setIsLoggedIn(false);
+            setCsrfToken(null);
         }
     };
 
-     // Funkcja do ODŚWIEŻANIA TOKENU
-     // --> docelowo modal z zapytaniem o to czy user chce pozostać zalogowanym
-    const refreshAuthToken = async () => {
-         try {
-             setIsLoading(true);
-             // FUNKCJA API odświeżania tokenu (przez axios powinna wysłać refresh cookie i otrzymać nowy access cookie)
-             await refreshToken(); //z auth.js
-
-             // odczytujemy NOWE, odświeżone access cookie i aktualizujemy: isLoggedIn/user
-             await fetchUserInfo(); // Sprawdzamy status po odświeżeniu
-
-             console.log("Token refreshed. State updated.");
-
-         } catch (error) {
-             console.error("Refresh failed:", error);
-             // Jeśli odświeżenie NIE POWIODŁO SIĘ (np. refresh cookie wygasło), status autoryzacji jest stracony
-             // fetchUserInfo() i tak ustawi stan na wylogowany
-             await fetchUserInfo(); // Sprawdzamy status po błędzie odświeżenia (ustawi isLoggedIn=false)
-             throw error; // Przekaż błąd dalej
-         } finally {
-              setIsLoading(false);
-         }
+    const refresh = async () => {
+        try {
+            if (!csrfToken) { // Również sprawdź CSRF przed odświeżeniem tokena
+                console.error("CSRF token missing for token refresh.");
+                throw new Error("Security error: CSRF token missing for refresh.");
+            }
+            await refreshToken(csrfToken); // Przekaż csrfToken
+            // Po odświeżeniu tokena, tokeny JWT są już w ciasteczkach
+            // Możemy ponownie spróbować pobrać informacje o użytkowniku, aby zaktualizować UI
+            await fetchInitialData(); // Odśwież dane użytkownika
+            console.log("Token refreshed successfully.");
+        } catch (error) {
+            console.error("Token refresh failed in AuthContext:", error);
+            setUser(null);
+            setIsLoggedIn(false);
+            router.push('/login'); // Jeśli odświeżenie nie powiedzie się, przekieruj na login
+            throw error;
+        }
     };
 
-    // EFEKT SPRAWDZAJĄCY STATUS PRZY STARCIE APLIKACJI 
+
     useEffect(() => {
-        console.log("AuthProvider mounted. Checking auth status...");
-        setIsLoading(true); // Zaczynamy ładowanie przy starcie
-        // Przy starcie, próbujemy pobrać dane użytkownika, funkcja fetchUserInfo() sama ustawi isLoggedIn i user na podstawie wyniku.
-        fetchUserInfo().finally(() => {
-             // Zakończ ładowanie po zakończeniu initial check
-              setIsLoading(false);
-        });
-    }, []); // Pusta tablica zależności - efekt uruchamia się tylko raz przy montowaniu Providera
+        console.log("AuthProvider mounted. Fetching initial data...");
+        fetchInitialData();
+    }, []); // Pusta tablica zależności - efekt uruchamia się tylko raz
 
-    // WARTOŚĆ UDOSTĘPNIANA PRZEZ KONTEKST
+    // Wartości dostarczane przez kontekst
     const contextValue = {
-        isLoggedIn,      // Status zalogowania (do odczytu)
-        user,            // Dane użytkownika (obiekt lub null)
-        isLoading,       // Czy Context aktywnie sprawdza/zmienia stan autoryzacji
-        login,           // Funkcja do logowania (wywołaj np. w LoginPage)
-        logout,          // Funkcja do wylogowania (wywołaj np. w Navbar)
-        refreshToken: refreshAuthToken, // Funkcja do odświeżania tokenu
-        fetchUserInfo,   // Funkcja do ręcznego sprawdzenia/odświeżenia statusu
-        // logika zmiany stanu jest w funkcjach login/logout/etc.
+        user,
+        isLoggedIn,
+        isLoading,
+        login,
+        logout,
+        refreshToken: refresh, // Zmień nazwę funkcji, aby uniknąć konfliktu
+        csrfToken // Udostępnij CSRF token w kontekście
     };
-
-    // --- RENDEROWANIE PROVIDERA ---
-    // Opcjonalnie: Pokaż loader, gdy sprawdzamy status autoryzacji
-     if (isLoading) {
-         return <div>Loading auth credentials ...</div>; // Prosty loader blokujący renderowanie reszty UI zależnego od statusu
-     }
 
     return (
         <AuthContext.Provider value={contextValue}>
-            {children} {/* Reszta Twojej aplikacji */}
+            {children}
         </AuthContext.Provider>
     );
 };
 
-// Pamiętaj, żeby zaimportować i użyć AuthProvider w app/layout.js, owijając nim <Navbar /> i {children}.
-// W komponentach, które potrzebują statusu lub funkcji (np. LoginPage, Navbar), importuj AuthContext i używaj useContext(AuthContext).
-
-
-
+// Funkcja pomocnicza do pobierania ciasteczka (przenieś ją do utils/auth.js, jeśli jeszcze jej tam nie ma)
+const getCookie = (name) => {
+    if (typeof document === 'undefined') {
+        return null;
+    }
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
