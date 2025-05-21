@@ -94,7 +94,14 @@ export const AuthProvider = ({ children }) => {
             setUser(responseData.user); // Ustawiamy zalogowanego użytkownika
             setIsLoggedIn(true); // Ustawiamy stan na zalogowany
             console.log("Login successful, user set:", responseData.user);
-            router.push('/'); // Przekierowujemy na stronę główną po zalogowaniu
+
+            // Używamy setTimeout z opóźnieniem 0, aby router.push został wywołany
+            // po zakończeniu bieżącego cyklu renderowania.
+            setTimeout(() => {
+                router.push('/'); // Przekierowujemy na stronę główną po zalogowaniu
+            }, 0);
+            
+
         } catch (error) {
             console.error("Login failed in AuthContext:", error);
             setUser(null); // Czyścimy dane użytkownika
