@@ -129,8 +129,11 @@ export const getUserInfo = async () => {
         return response.data;
     }
     catch (e) {
-        console.error("Szczegóły błędu w utils/auth.js (getUserInfo):", e.response?.data || e.message || e);
-        throw new Error(e.response?.data?.detail || "Getting user info failed!");
+        console.warn("getUserInfo failed, but not throwing an error. This is expected if user is not logged in. Szczegóły błędu w utils/auth.js (getUserInfo):", e.response?.data || e.message || e);
+        //console.error("Szczegóły błędu w utils/auth.js (getUserInfo):", e.response?.data || e.message || e);
+        //throw new Error(e.response?.data?.detail || "Getting user info failed!");
+        // Nie rzucamy błędem, tylko logujemy ostrzeżenie
+        return null; // Możesz też zwrócić null lub undefined, aby zasygnalizować brak danych użytkownika
     }
 }
 

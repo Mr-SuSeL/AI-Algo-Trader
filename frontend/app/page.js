@@ -2,6 +2,8 @@
 
 import React, { useContext } from 'react'; // <-- Zmienione: Importujemy useContext
 import Navbar from '../components/Navbar';
+import Blog from '../components/Blog';
+import HelloUser from '../components/HelloUser';
 import { AuthContext } from '../store/AuthContext'; // <-- Zmienione: Importujemy TYLKO AuthContext
 
 export default function Home() {
@@ -28,12 +30,9 @@ export default function Home() {
         <div>
             {/* Navbar również będzie miał dostęp do AuthContext, jeśli używa useContext(AuthContext) */}
             <Navbar />
-            <div className="m-10">
-                {isLoggedIn && user ? ( // Sprawdzamy isLoggedIn ORAZ czy obiekt user istnieje
-                    <h1>Cześć, {user.username}!</h1>
-                ) : (
-                    <h1>Witaj nieznajomy!</h1>
-                )}
+            <HelloUser user={user} isLoggedIn={isLoggedIn} />
+            <div>
+                <Blog />
             </div>
         </div>
     );

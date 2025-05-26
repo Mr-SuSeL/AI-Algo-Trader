@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'articles',
 ]
 
 
@@ -122,17 +123,19 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # settings.py
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 1. Sesyjne uwierzytelnianie (dla admina Django i ewentualnie testów)
         'rest_framework.authentication.SessionAuthentication',
-        # 2. Uwierzytelnianie JWT z Twojej implementacji (tokeny z ciasteczek)
         'users.authentication.CookieJWTAuthentication',
         # Jeśli używasz też tokenów w nagłówku "Authorization: Bearer":
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        # Domyślnie, wymagaj uwierzytelnienia dla WSZYSTKICH endpointów API
-        'rest_framework.permissions.IsAuthenticated',
+        #'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',  # Umożliwia dostęp do niektórych endpointów bez uwierzytelnienia
     ),
 }
 
