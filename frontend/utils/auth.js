@@ -154,3 +154,10 @@ export const refreshToken = async (csrfToken) => { // <-- DODAJ csrfToken
         throw new Error(e.response?.data?.detail || "Refreshing token failed!");
     }
 }
+
+export function deleteAuthCookies() {
+    document.cookie = 'access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    document.cookie = 'refresh_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    document.cookie = 'csrftoken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    console.log('Frontend: Relevant cookies explicitly deleted after logout.');
+}

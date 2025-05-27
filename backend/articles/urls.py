@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import article_list
+from .views import article_list, article_detail_by_slug
 
-# URL patterns for the articles app
 urlpatterns = [
     path('articles/', article_list, name='article-list'),
+    path('articles/<slug:slug>/', article_detail_by_slug, name='article-detail-by-slug'),
 ]

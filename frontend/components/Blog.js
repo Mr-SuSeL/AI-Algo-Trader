@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link'; // Import Link
 
 export default function Blog() {
     const [articles, setArticles] = useState([]);
@@ -46,7 +47,9 @@ export default function Blog() {
                                 <p className="mt-2 text-gray-600">{article.description}</p>
                                 <p className="mt-2 text-sm text-gray-500">Autor: {article.author}</p>
                                 <p className="mt-1 text-sm text-gray-500">Opublikowano: {new Date(article.published).toLocaleDateString()}</p>
-                                <a href={`/blog/${article.slug}`} className="inline-block mt-4 text-indigo-600 hover:underline">Czytaj więcej</a>
+                                    <Link href={`/blog/${article.slug}`} prefetch={false} className="inline-block mt-4 text-indigo-600 hover:underline">
+                                        Czytaj więcej
+                                    </Link>
                             </div>
                         </div>
                     ))}
