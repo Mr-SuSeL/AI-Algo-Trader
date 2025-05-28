@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Blog from '../components/Blog';
 import HelloUser from '../components/HelloUser';
 import { AuthContext } from '../store/AuthContext'; // <-- Zmienione: Importujemy TYLKO AuthContext
+import Footer from '../components/Footer'; // Importujemy komponent Footer
 
 export default function Home() {
     // Używamy useContext, aby uzyskać dostęp do stanu uwierzytelnienia z AuthContext
@@ -28,12 +29,13 @@ export default function Home() {
 
     return (
         <div>
-            {/* Navbar również będzie miał dostęp do AuthContext, jeśli używa useContext(AuthContext) */}
+            
             <Navbar />
             <HelloUser user={user} isLoggedIn={isLoggedIn} />
             <div>
                 <Blog />
             </div>
+            <Footer /> 
         </div>
     );
 }

@@ -1,10 +1,7 @@
+// frontend/app/blog/[slug]/page.js
 import { notFound } from 'next/navigation';
 
 const API_URL = 'http://localhost:8000/api/articles/';
-
-// export async function generateStaticParams() {
-//     return [{ slug: 'my-first-article' }, { slug: 'my-second-article' }];
-// }
 
 export async function generateStaticParams() {
     try {
@@ -14,7 +11,6 @@ export async function generateStaticParams() {
             return [];
         }
         const articles = await res.json();
-        // console.log('Odebrane artykuły w generateStaticParams:', articles);
         return articles.map((article) => ({ slug: article.slug }));
     } catch (error) {
         console.error('Błąd podczas pobierania listy artykułów:', error);
@@ -54,9 +50,9 @@ export default async function ArticleDetail({ params }) {
         <div className="max-w-4xl mx-auto p-6">
             <h1 className="text-4xl font-bold text-blue-600 mb-4">{article.title}</h1>
             <p className="text-gray-800 text-lg mb-4">{article.content}</p>
-            <p className="text-sm text-gray-500">Autor: {article.author}</p>
+            <p className="text-sm text-gray-500">Autor: {article.author?.nickname || article.author?.username}</p>
             <p className="text-sm text-gray-500">Opublikowano: {new Date(article.published).toLocaleDateString()}</p>
-            {/* Zakomentowany przycisk */}
+            {/* Zakomentowany przycisk - potem wyciągnij komponent kliencki ewentualnie*/}
             {/*
             <button
                 onClick={() => window.history.back()}

@@ -33,7 +33,7 @@ const Pagination = ({ currentPage, totalPosts, postsPerPage, paginate }) => {
             <button
                 key={number}
                 onClick={() => paginate(number)}
-                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${currentPage === number ? 'bg-indigo-600 text-white hover:bg-indigo-500' : ''}`}
+                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 cursor-pointer ${currentPage === number ? 'bg-indigo-600 text-white hover:bg-indigo-500' : ''}`}
             >
                 {number}
             </button>
@@ -43,7 +43,7 @@ const Pagination = ({ currentPage, totalPosts, postsPerPage, paginate }) => {
         <button
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
-            className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+            className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 cursor-pointer"
         >
             <span className="sr-only">Poprzednia</span>
             <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -56,7 +56,7 @@ const Pagination = ({ currentPage, totalPosts, postsPerPage, paginate }) => {
         <button
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === Math.ceil(totalPosts / postsPerPage)}
-            className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+            className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 cursor-pointer"
         >
             <span className="sr-only">Następna</span>
             <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
