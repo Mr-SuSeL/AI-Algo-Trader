@@ -1,33 +1,32 @@
-// frontend/app/blog/page.js
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link'; // Import Link
-import Pagination from '@/components/Pagination'; // Załóżmy, że stworzysz taki komponent
+import Pagination from '@/components/Pagination'; // Assuming you have this component
 
 export default function Blog() {
     const [allArticles, setAllArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [postsPerPage, setPostsPerPage] = useState(6); // Domyślnie dla desktopa
+    const [postsPerPage, setPostsPerPage] = useState(6); // Default for desktop
 
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth < 768) { // Zakładamy, że 768px to próg dla mobile
+            if (window.innerWidth < 768) { // Assuming 768px is the mobile breakpoint
                 setPostsPerPage(3);
             } else {
                 setPostsPerPage(6);
             }
         };
 
-        // Początkowe ustawienie
+        // Initial setting
         handleResize();
 
-        // Dodanie listenera na zmianę rozmiaru okna
+        // Add listener for window resize
         window.addEventListener('resize', handleResize);
 
-        // Cleanup listenera
+        // Cleanup listener
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
@@ -58,11 +57,11 @@ export default function Blog() {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     if (loading) {
-        return <div>Ładowanie artykułów...</div>;
+        return <div>Loading articles...</div>;
     }
 
     if (error) {
-        return <div>Błąd ładowania artykułów: {error}</div>;
+        return <div>Error loading articles: {error}</div>;
     }
 
     return (
@@ -74,17 +73,21 @@ export default function Blog() {
                             <div className="p-6">
                                 <h2 className="text-xl font-semibold text-gray-900">{article.title}</h2>
                                 <p className="mt-2 text-gray-600">{article.description}</p>
-                                <p className="mt-2 text-sm text-gray-500">Autor: {article.author?.nickname || article.author?.username || article.author?.email || 'Nieznany'}</p>
-                                <p className="mt-1 text-sm text-gray-500">Opublikowano: {new Date(article.published).toLocaleDateString()}</p>
-                                    <Link href={`/blog/${article.slug}`} prefetch={false} className="inline-block mt-4 text-indigo-600 hover:underline">
-                                        Czytaj więcej
-                                    </Link>
+                                <p className="mt-2 text-sm text-gray-500">Author: {article.author?.nickname || article.author?.username || article.author?.email || 'Unknown'}</p>
+                                <p className="mt-1 text-sm text-gray-500">Published: {new Date(article.published).toLocaleDateString()}</p>
+                                <Link
+                                    href={`/blog/${article.slug}`}
+                                    prefetch={false}
+                                    className="inline-block mt-4 text-indigo-600 ring ring-indigo-200 opacity-70 rounded py-1 px-4 hover:bg-indigo-100 hover:text-indigo-800 hover:ring-indigo-300 hover:font-semibold text-sm"
+                                >
+                                    Read More
+                                </Link>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {allArticles.length > 0 && ( // Zabezpieczenie przed renderowaniem Pagination bez danych
+                {allArticles.length > 0 && ( // Prevent rendering Pagination without data
                     <Pagination
                         currentPage={currentPage}
                         totalPosts={allArticles.length}
