@@ -31,7 +31,7 @@ function Navbar() {
         <header className="bg-gray-800 text-white p-4 shadow-md">
             <nav className="container mx-auto flex justify-between items-center">
                 {/* Lewa strona: Logo/Nazwa aplikacji */}
-                <div className="text-lg font-bold">
+                <div className="text-lg md:text-base lg:text-lg font-bold">
                     <Link href="/" className="hover:text-gray-300">
                         AI Algo Trader
                     </Link>
@@ -39,9 +39,9 @@ function Navbar() {
 
                 {/* Środkowa część (widoczna na większych ekranach) */}
                 <div className="hidden md:flex space-x-4">
-                    <Link href="#link1" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold">Link1</Link>
-                    <Link href="#link2" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold">Link2</Link>
-                    <Link href="#link3" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold">Link3</Link>
+                    <Link href="#link1" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link1</Link>
+                    <Link href="#link2" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link2</Link>
+                    <Link href="#link3" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link3</Link>
                 </div>
 
                 {/* Prawa strona: Hamburger menu (małe ekrany) i przyciski logowania/wylogowania */}
@@ -60,28 +60,32 @@ function Navbar() {
                     </div>
 
                     {/* Przyciski logowania/wylogowania (widoczne zawsze na większych ekranach) */}
-                    {isLoading && <span className="text-gray-500 hidden md:inline">Ładowanie...</span>}
-                    {isLoggedIn && user && <span className="text-gray-300 hidden md:inline">Witaj, {user.email || user.username || 'Użytkowniku'}!</span>}
+                    {isLoading && <span className="text-gray-500 hidden md:inline md:text-sm lg:text-base">Ładowanie...</span>}
+                    {isLoggedIn && user ? (
+                        <span className="text-gray-300 hidden md:inline md:text-sm lg:text-base">
+                            Witaj, {user.nickname || user.username || user.email}!
+                        </span>
+                    ) : null}
 
                     {isLoggedIn ? (
-                      <button
-                          onClick={handleLogout}
-                          className="bg-red-500 hover:bg-red-600 hover:font-bold text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline"
-                          disabled={isLoading}
-                      >
-                          Log out
-                      </button>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-red-500 hover:bg-red-600 hover:font-bold text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base"
+                            disabled={isLoading}
+                        >
+                            Log out
+                        </button>
                     ) : (
                         <>
                             <Link
                                 href="/login"
-                                className="bg-green-600 hover:bg-white hover:text-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline"
+                                className="bg-green-600 hover:bg-white hover:text-green-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base"
                             >
                                 Log in
                             </Link>
                             <Link
                                 href="/register"
-                                className="bg-yellow-600 hover:bg-white hover:text-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline"
+                                className="bg-yellow-600 hover:bg-white hover:text-yellow-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base"
                             >
                                 Register
                             </Link>
@@ -90,7 +94,7 @@ function Navbar() {
                 </div>
             </nav>
 
-            {/* Menu mobilne (rozwijane z animacją) */}
+            {/* Menu mobilne (rozwijane z animacją) - tutaj też zmiana */}
             <div className={`md:hidden fixed top-0 left-0 w-full h-full bg-gray-800 z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-4">
                     <div className="flex justify-end mb-4">
@@ -100,27 +104,31 @@ function Navbar() {
                             </svg>
                         </button>
                     </div>
-                    <Link href="#link1" className="block py-2 px-4 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300">Link1</Link>
-                    <Link href="#link2" className="block py-2 px-4 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300">Link2</Link>
-                    <Link href="#link3" className="block py-2 px-4 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300">Link3</Link>
-                    {isLoading && <span className="text-gray-500 block py-2 text-center">Ładowanie...</span>}
-                    {isLoggedIn && user && <span className="text-gray-300 block py-2 text-center">Witaj, {user.email || user.username || 'Użytkowniku'}!</span>}
+                    <Link href="#link1" className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link1</Link>
+                    <Link href="#link2" className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link2</Link>
+                    <Link href="#link3" className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link3</Link>
+                    {isLoading && <span className="text-gray-500 block py-2 text-center md:text-sm">Ładowanie...</span>}
+                    {isLoggedIn && user ? (
+                        <span className="text-gray-300 block py-2 text-center md:text-sm">
+                            Witaj, {user.nickname || user.username || user.email}!
+                        </span>
+                    ) : null}
                     {isLoggedIn ? (
                         <div className="text-center">
-                          <button
-                              onClick={handleLogout}
-                              className="bg-red-500 my-4 hover:bg-red-600 hover:font-bold text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full text-center"
-                              disabled={isLoading}
-                          >
-                              Log out
-                          </button>
+                            <button
+                                onClick={handleLogout}
+                                className="bg-red-500 my-4 hover:bg-red-600 hover:font-bold text-white font-bold py-2 px-4 md:py-1 md:px-2 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full text-center md:text-sm"
+                                disabled={isLoading}
+                            >
+                                Log out
+                            </button>
                         </div>
                     ) : (
                         <div className="text-center">
                             <div className="mb-2">
                                 <Link
                                     href="/login"
-                                    className="inline-block bg-green-600 hover:bg-white hover:text-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                    className="inline-block bg-green-600 hover:bg-white hover:text-green-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm"
                                 >
                                     Log in
                                 </Link>
@@ -128,7 +136,7 @@ function Navbar() {
                             <div>
                                 <Link
                                     href="/register"
-                                    className="inline-block bg-yellow-600 hover:bg-white hover:text-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                    className="inline-block bg-yellow-600 hover:bg-white hover:text-yellow-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm"
                                 >
                                     Register
                                 </Link>
