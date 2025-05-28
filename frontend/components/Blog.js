@@ -74,7 +74,7 @@ export default function Blog() {
                             <div className="p-6">
                                 <h2 className="text-xl font-semibold text-gray-900">{article.title}</h2>
                                 <p className="mt-2 text-gray-600">{article.description}</p>
-                                <p className="mt-2 text-sm text-gray-500">Autor: {article.author}</p>
+                                <p className="mt-2 text-sm text-gray-500">Autor: {article.author?.nickname || article.author?.username || article.author?.email || 'Nieznany'}</p>
                                 <p className="mt-1 text-sm text-gray-500">Opublikowano: {new Date(article.published).toLocaleDateString()}</p>
                                     <Link href={`/blog/${article.slug}`} prefetch={false} className="inline-block mt-4 text-indigo-600 hover:underline">
                                         Czytaj więcej

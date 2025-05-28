@@ -6,19 +6,19 @@ from django.contrib.auth import authenticate
 class CustomUserSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'username')
+        fields = ('id', 'email', 'username', 'nickname') # Dodaj 'nickname'
 
 # Rejestrowanie
-class RegisterUserSerializer(ModelSerializer): # bez tego jest 403 
+class RegisterUserSerializer(ModelSerializer): # bez tego jest 403
     class Meta:
         model = CustomUser
         fields = ('email', 'username', 'password')
         extra_kwargs = { "password": {"write_only":True} }
-    
+
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
         return user
-    
+
 # Logowanie
 class LoginUserSerializer(Serializer):
     email = serializers.EmailField(required=True)
@@ -30,5 +30,3 @@ class LoginUserSerializer(Serializer):
         if user and user.is_active:
             return user
         raise serializers.ValidationError("Incorrect credentials!")
-
-

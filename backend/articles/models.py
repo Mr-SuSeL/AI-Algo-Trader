@@ -28,11 +28,10 @@ class Article(models.Model):
             while Article.objects.filter(slug=unique_slug).exists():
                 unique_slug = f"{base_slug}-{counter}"
                 counter += 1
-
-        self.slug = unique_slug
-
+            self.slug = unique_slug
         super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-published']
+
 
