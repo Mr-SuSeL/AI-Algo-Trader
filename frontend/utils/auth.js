@@ -150,8 +150,8 @@ export const refreshToken = async (csrfToken) => { // <-- DODAJ csrfToken
         return response.data;
     }
     catch (e) {
-        console.error("Szczegóły błędu w utils/auth.js (refreshToken):", e.response?.data || e.message || e);
-        throw new Error(e.response?.data?.detail || "Refreshing token failed!");
+        console.warn("Szczegóły błędu w utils/auth.js (refreshToken):", e.response?.data || e.message || e);
+        //throw new Error(e.response?.data?.detail || "Refreshing token failed!");
     }
 }
 
