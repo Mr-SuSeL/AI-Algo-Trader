@@ -13,6 +13,7 @@ function Navbar() {
     }
 
     const { isLoggedIn, user, logout, isLoading } = authContext;
+    const isAdminOrStaff = isLoggedIn && (user?.is_superuser || user?.is_staff);
 
     const handleLogout = async () => {
         try {
@@ -39,9 +40,11 @@ function Navbar() {
 
                 {/* Środkowa część (widoczna na większych ekranach) */}
                 <div className="hidden md:flex space-x-4">
-                    <Link href="#link1" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link1</Link>
-                    <Link href="#link2" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link2</Link>
-                    <Link href="#link3" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link3</Link>
+                    <Link href="#" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link1</Link>
+                    <Link href="#" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link 2</Link>
+                    {isAdminOrStaff && (
+                        <Link href="/blog/add" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Dodaj artykuł</Link>
+                    )}
                 </div>
 
                 {/* Prawa strona: Hamburger menu (małe ekrany) i przyciski logowania/wylogowania */}
@@ -94,7 +97,7 @@ function Navbar() {
                 </div>
             </nav>
 
-            {/* Menu mobilne (rozwijane z animacją) - tutaj też zmiana */}
+            {/* Menu mobilne (rozwijane z animacją) - tutaj dodajemy link */}
             <div className={`md:hidden fixed top-0 left-0 w-full h-full bg-gray-800 z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-4">
                     <div className="flex justify-end mb-4">
@@ -104,9 +107,11 @@ function Navbar() {
                             </svg>
                         </button>
                     </div>
-                    <Link href="#link1" className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link1</Link>
-                    <Link href="#link2" className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link2</Link>
-                    <Link href="#link3" className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link3</Link>
+                    <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link1</Link>
+                    <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link2</Link>
+                    {isAdminOrStaff && (
+                        <Link href="/blog/add" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Dodaj artykuł</Link>
+                    )}
                     {isLoading && <span className="text-gray-500 block py-2 text-center md:text-sm">Ładowanie...</span>}
                     {isLoggedIn && user ? (
                         <span className="text-gray-300 block py-2 text-center md:text-sm">

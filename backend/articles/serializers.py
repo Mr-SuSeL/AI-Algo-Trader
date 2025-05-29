@@ -16,3 +16,8 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = '__all__' # Zawiera wszystkie pola modelu
+
+class ArticleCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ('title', 'description', 'content')

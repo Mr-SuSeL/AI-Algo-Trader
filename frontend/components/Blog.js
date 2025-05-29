@@ -34,7 +34,7 @@ export default function Blog() {
         const fetchArticles = async () => {
             setLoading(true);
             try {
-                const res = await fetch('http://localhost:8000/api/articles/articles/');
+                const res = await fetch('http://localhost:8000/api/articles/')
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
                 }

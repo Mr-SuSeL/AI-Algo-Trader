@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate
 class CustomUserSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'username', 'nickname') # Dodaj 'nickname'
+        fields = ('id', 'email', 'username', 'nickname', 'is_superuser', 'is_staff') # Dodano 'is_superuser' i 'is_staff'
 
 # Rejestrowanie
 class RegisterUserSerializer(ModelSerializer): # bez tego jest 403

@@ -122,18 +122,21 @@ export const logoutUser = async (csrfToken) => { // <-- DODAJ csrfToken
     }
 }
 
-// getUserInfo nie wymaga csrfToken, bo to GET, ale można go przekazać dla spójności
 export const getUserInfo = async () => {
     try {
         const response = await axios.get(`${API_URL}user-info/`, { withCredentials: true });
-        return response.data;
+        // Dodajemy is_superuser i is_staff do zwracanego obiektu user
+        return {
+            user: {
+                ...response.data,
+                is_superuser: response.data.is_superuser,
+                is_staff: response.data.is_staff,
+            }
+        };
     }
     catch (e) {
         console.warn("getUserInfo failed, but not throwing an error. This is expected if user is not logged in. Szczegóły błędu w utils/auth.js (getUserInfo):", e.response?.data || e.message || e);
-        //console.error("Szczegóły błędu w utils/auth.js (getUserInfo):", e.response?.data || e.message || e);
-        //throw new Error(e.response?.data?.detail || "Getting user info failed!");
-        // Nie rzucamy błędem, tylko logujemy ostrzeżenie
-        return null; // Możesz też zwrócić null lub undefined, aby zasygnalizować brak danych użytkownika
+        return { user: null }; // Zwracamy obiekt z null zamiast samego nulla
     }
 }
 
