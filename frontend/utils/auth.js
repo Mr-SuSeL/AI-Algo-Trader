@@ -140,17 +140,17 @@ export const getUserInfo = async () => {
     }
 }
 
-export const refreshToken = async (csrfToken) => { // <-- DODAJ csrfToken
+export const refreshToken = async (csrfToken) => {
     try {
         const response = await axios.post(`${API_URL}refresh/`, null,
             {
                 withCredentials: true,
                 headers: {
-                    'X-CSRFToken': csrfToken // <-- UŻYJ PRZEKAZANEGO TOKENA
+                    'X-CSRFToken': csrfToken
                 }
             }
         );
-        return response.data;
+        return response.data; // Zakładamy, że response.data zawiera { access: 'nowy_access_token' }
     }
     catch (e) {
         console.warn("Szczegóły błędu w utils/auth.js (refreshToken):", e.response?.data || e.message || e);

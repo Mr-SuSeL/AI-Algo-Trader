@@ -103,16 +103,36 @@ export const AuthProvider = ({ children }) => {
                 if (!currentCsrf) throw new Error("CSRF token missing for refresh.");
                 setCsrfToken(currentCsrf);
             }
-            await refreshToken(currentCsrf);
-            await fetchInitialData();
-            console.log("Token refreshed successfully.");
+            const response = await refreshToken(currentCsrf);
+            if (response?.access) {
+                console.log("Token refreshed successfully:", response);
+                // Backend ustawił nowe ciasteczko access_token, więc teraz możemy pobrać info o użytkowniku
+                await fetchUserInfoAfterRefresh();
+            } else {
+                console.warn("Token refresh successful, but no access token in response.");
+                await fetchInitialData(); // Fallback, ale może nie być idealne
+            }
         } catch (error) {
             console.error("Token refresh failed in AuthContext:", error);
             deleteAuthCookies();
             setUser(null);
             setIsLoggedIn(false);
             setIsSessionExpired(true);
-            console.log("AuthContext: Session expired flag set to true."); // Dodany log
+            console.log("AuthContext: Session expired flag set to true.");
+        }
+    };
+
+    const fetchUserInfoAfterRefresh = async () => {
+        try {
+            const userData = await getUserInfo();
+            setUser(userData.user);
+            setIsLoggedIn(true);
+            console.log("User info fetched after refresh:", userData.user);
+        } catch (authError) {
+            console.warn("Failed to fetch user info after refresh:", authError.message);
+            // Możesz chcieć wylogować użytkownika tutaj, jeśli nie można pobrać info
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -153,4 +173,8 @@ export const AuthProvider = ({ children }) => {
             {children}
         </AuthContext.Provider>
     );
+};
+
+export const useAuth = () => {
+    return useContext(AuthContext);
 };
