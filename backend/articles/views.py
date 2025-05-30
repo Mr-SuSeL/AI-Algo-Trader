@@ -30,3 +30,14 @@ def article_create(request):
         article = serializer.save(author=request.user)
         return Response(ArticleDetailSerializer(article).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE']) # Określamy, że to jest widok dla metody DELETE
+@permission_classes([IsAuthenticated]) # Wymagaj uwierzytelnienia do usuwania
+def article_delete_by_slug(request, slug): # Teraz przyjmuje 'slug'
+    article = get_object_or_404(Article, slug=slug)
+
+    if article.author == request.user or request.user.is_staff or request.user.is_superuser:
+        article.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    else:
+        return Response({"detail": "Nie masz uprawnień do usunięcia tego artykułu."}, status=status.HTTP_403_FORBIDDEN)
