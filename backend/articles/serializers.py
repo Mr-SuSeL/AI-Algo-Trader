@@ -21,3 +21,8 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ('title', 'description', 'content')
+
+class ArticleUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ('title', 'description', 'content')

@@ -1,4 +1,3 @@
-// frontend/app/blog/[slug]/ArticleDetailClient.js
 "use client";
 
 import React, { useContext, useState } from 'react';
@@ -7,13 +6,13 @@ import { AuthContext } from '@/store/AuthContext';
 import { useRouter } from 'next/navigation';
 
 function ArticleDetailClient({ article }) {
-    const { user, isLoggedIn, isLoading, csrfToken } = useContext(AuthContext);
-    const isAdminOrStaff = isLoggedIn && (user?.is_superuser || user?.is_staff);
+    const { user, isLoggedIn, csrfToken } = useContext(AuthContext);
     const isAuthor = isLoggedIn && user?.id === article?.author?.id;
-    const router = useRouter();
+
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteError, setDeleteError] = useState(null);
     const [deleteSuccess, setDeleteSuccess] = useState(null);
+    const router = useRouter();
 
     const handleDeleteClick = () => {
         setShowDeleteModal(true);
@@ -23,7 +22,7 @@ function ArticleDetailClient({ article }) {
         setShowDeleteModal(false);
     };
 
- const confirmDeleteArticle = async () => {
+    const confirmDeleteArticle = async () => {
         if (!article?.id) {
             console.error("Article ID is missing, cannot delete.");
             setDeleteError("Could not delete article: ID is missing.");
@@ -43,7 +42,7 @@ function ArticleDetailClient({ article }) {
                 setDeleteSuccess("Article deleted successfully.");
                 setShowDeleteModal(false);
                 setTimeout(() => {
-                    router.push('/'); // Zmieniono na przekierowanie na stronę główną
+                    router.push('/');
                 }, 1500);
             } else {
                 const errorData = await response.json();
@@ -57,7 +56,7 @@ function ArticleDetailClient({ article }) {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6 relative"> {/* Dodano relative dla pozycjonowania modala */}
+        <div className="max-w-4xl mx-auto p-6 relative">
             <h1 className="text-4xl font-bold text-blue-600 mb-4">{article?.title}</h1>
             <p className="text-gray-800 text-lg mb-4">{article?.content}</p>
             <p className="text-sm text-gray-500">Author: {article?.author?.nickname || article?.author?.username || 'Unknown'}</p>
@@ -70,11 +69,14 @@ function ArticleDetailClient({ article }) {
                 >
                     Back
                 </button>
-                {isLoggedIn && isAdminOrStaff && isAuthor && (
+                {isLoggedIn && (user?.is_superuser || isAuthor) && (
                     <>
-                        <button className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                        <Link
+                            href={`/blog/${article?.slug}/edit`}
+                            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+                        >
                             Edit
-                        </button>
+                        </Link>
                         <button
                             onClick={handleDeleteClick}
                             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
@@ -85,10 +87,9 @@ function ArticleDetailClient({ article }) {
                 )}
             </div>
 
-            {/* Modal potwierdzenia usunięcia */}
             {showDeleteModal && (
                 <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center"
-                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }} // Czarne tło z 50% przezroczystości
+                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
                 >
                     <div className="bg-white p-6 rounded-md shadow-xl">
                         <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
