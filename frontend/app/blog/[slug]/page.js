@@ -7,7 +7,7 @@ const API_URL = 'http://localhost:8000/api/articles/';
 
 export async function generateStaticParams() {
     try {
-        const res = await fetch(`${API_URL}articles/`);
+        const res = await fetch(`${API_URL}`);
         if (!res.ok) {
             console.error('Błąd podczas pobierania listy artykułów:', res.status, res.statusText);
             return [];
@@ -21,10 +21,9 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-    // Oczekujemy na params
     const { slug } = await params;
     try {
-        const res = await fetch(`${API_URL}articles/${slug}/`);
+        const res = await fetch(`${API_URL}${slug}/`);
         if (!res.ok) return { title: 'Artykuł nieznaleziony' };
         const article = await res.json();
         return {
@@ -38,7 +37,7 @@ export async function generateMetadata({ params }) {
 }
 
 async function getArticle(slug) {
-    const res = await fetch(`${API_URL}articles/${slug}/`);
+    const res = await fetch(`${API_URL}${slug}/`);
     if (!res.ok) {
         notFound();
     }
@@ -48,6 +47,5 @@ async function getArticle(slug) {
 export default async function ArticleDetail({ params }) {
     const { slug } = await params;
     const article = await getArticle(slug);
-
     return <ArticleDetailClient article={article} />;
 }
