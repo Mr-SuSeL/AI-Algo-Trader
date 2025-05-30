@@ -8,9 +8,10 @@ export const getCookie = (name) => {
         console.log(`[getCookie] Running in non-browser environment. Returning null for ${name}.`);
         return null;
     }
+    console.log(`[getCookie] Looking for cookie: "${name}"`);
+    console.log(`[getCookie] All cookies: "${document.cookie}"`); // Dodane logowanie wszystkich ciasteczek
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
-        console.log(`[getCookie] document.cookie: "${document.cookie}"`);
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
             let cookie = cookies[i].trim();

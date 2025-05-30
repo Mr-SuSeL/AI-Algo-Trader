@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { loginUser, logoutUser, refreshToken, getUserInfo, getCookie, deleteAuthCookies } from '@/utils/auth';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 
 export const AuthContext = createContext(null);
 
@@ -14,34 +13,44 @@ export const AuthProvider = ({ children }) => {
     const [isSessionExpired, setIsSessionExpired] = useState(false);
     const router = useRouter();
 
+    useEffect(() => {
+        console.log("[AuthProvider - useEffect - top level] document.cookie:", document.cookie); // Przeniesione logowanie
+    }, []);
+
     const fetchInitialData = async () => {
-            setIsLoading(true); // Dodaj to na początku
-            try {
-                const accessToken = getCookie('access_token');
+        setIsLoading(true);
+        try {
+            const accessToken = getCookie('access_token');
+            if (accessToken) {
                 try {
                     const userData = await getUserInfo(accessToken);
-                    if (userData.user) {
+                    if (userData?.user) {
                         setUser(userData.user);
                         setIsLoggedIn(true);
                         console.log("User info fetched successfully:", userData.user);
                     } else {
                         setUser(null);
                         setIsLoggedIn(false);
-                        console.log("No user data on initial fetch.");
+                        console.log("No user data on initial fetch (but access token was present).");
                     }
                 } catch (authError) {
-                    console.warn("User info fetch failed (expected if not logged in yet):", authError.message);
+                    console.warn("User info fetch failed on initial load (access token present):", authError.message);
                     setUser(null);
-                    setIsLoggedIn(false);
+                    // Nie ustawiamy od razu isLoggedIn na false. Pozwalamy interwałowi spróbować odświeżyć.
                 }
-            } catch (error) {
-                console.error("Auth check failed during initial data fetch:", error);
-                setIsLoggedIn(false);
+            } else {
                 setUser(null);
-            } finally {
-                setIsLoading(false);
+                setIsLoggedIn(false);
+                console.log("No access token on initial fetch.");
             }
-        };
+        } catch (error) {
+            console.error("Auth check failed during initial data fetch:", error);
+            setIsLoggedIn(false);
+            setUser(null);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const login = async (email, password) => {
         try {
@@ -59,22 +68,19 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-            try {
-                // Spróbuj wylogować się na backendzie. Jeśli refresh_token jest obecny, zostanie użyty.
-                const response = await logoutUser();
-                console.log("Backend logout API call successful (status:", response?.status, ').');
-            } catch (error) {
-                console.error("Logout API call failed:", error);
-                // Nie traktujemy błędu wylogowania backendu jako krytycznego dla wylogowania frontendowego.
-                // Nawet jeśli się nie uda, wyczyścimy ciasteczka lokalnie.
-            } finally {
-                deleteAuthCookies();
-                setUser(null);
-                setIsLoggedIn(false);
-                console.log('Frontend: Relevant cookies explicitly deleted after logout.');
-                router.push('/');
-            }
-        };
+        try {
+            await logoutUser();
+            console.log("Backend logout API call initiated.");
+        } catch (error) {
+            console.error("Logout API call failed:", error);
+        } finally {
+            deleteAuthCookies();
+            setUser(null);
+            setIsLoggedIn(false);
+            console.log('Frontend: Relevant cookies deleted after logout.');
+            router.push('/');
+        }
+    };
 
     const refresh = async () => {
         try {
@@ -84,7 +90,7 @@ export const AuthProvider = ({ children }) => {
                 await fetchUserInfoAfterRefresh();
             } else {
                 console.warn("Token refresh successful, but no access token in response.");
-                await fetchInitialData(); // Fallback, ale może nie być idealne
+                await fetchInitialData(); // Fallback
             }
         } catch (error) {
             console.error("Token refresh failed in AuthContext:", error);
@@ -98,33 +104,39 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUserInfoAfterRefresh = async () => {
         try {
-            const accessToken = getCookie('access_token'); // Pobierz token bezpośrednio z ciasteczka
+            const accessToken = getCookie('access_token');
             if (!accessToken) {
                 console.warn("fetchUserInfoAfterRefresh: No access token found in cookies.");
                 return;
             }
-            const userData = await getUserInfo(accessToken); // Przekaż token do getUserInfo
+            const userData = await getUserInfo(accessToken);
             setUser(userData.user);
             setIsLoggedIn(true);
             console.log("User info fetched after refresh:", userData.user);
         } catch (authError) {
             console.warn("Failed to fetch user info after refresh:", authError.message);
-            // Możesz chcieć wylogować użytkownika tutaj, jeśli nie można pobrać info
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        console.log("AuthProvider mounted. Fetching initial data...");
-        fetchInitialData();
+        console.log("AuthProvider mounted. Setting timeout for initial data fetch...");
+        const timeoutId = setTimeout(() => {
+            console.log("Timeout expired. Fetching initial data...");
+            console.log("[AuthProvider useEffect] document.cookie:", document.cookie);
+            fetchInitialData();
+        }, 0);
 
         const intervalId = setInterval(() => {
             console.log("AuthContext: Interval tick.");
             refresh();
-        }, 120000); // Co 2 minuty
+        }, 120000);
 
-        return () => clearInterval(intervalId);
+        return () => {
+            clearTimeout(timeoutId);
+            clearInterval(intervalId);
+        };
     }, []);
 
     const contextValue = {
