@@ -1,5 +1,3 @@
-// frontend/store/AuthContext.js
-
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
@@ -13,51 +11,41 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [csrfToken, setCsrfToken] = useState(null);
-    const [isSessionExpired, setIsSessionExpired] = useState(false); // Nowy stan
-
+    const [isSessionExpired, setIsSessionExpired] = useState(false);
     const router = useRouter();
 
     const fetchInitialData = async () => {
-        try {
-            await axios.get(`http://localhost:8000/api/users/csrf-token/`, { withCredentials: true });
-            const initialCsrf = getCookie('csrftoken');
-            if (initialCsrf) {
-                setCsrfToken(initialCsrf);
-                console.log("Initial CSRF token obtained and set in state:", initialCsrf);
-            } else {
-                console.warn("CSRF token not found after initial fetch.");
-                setIsLoading(false);
-                return;
-            }
+            setIsLoading(true); // Dodaj to na początku
             try {
-                const userData = await getUserInfo();
-                setUser(userData.user);
-                setIsLoggedIn(true);
-                console.log("User info fetched successfully:", userData.user);
-            } catch (authError) {
-                console.warn("User info fetch failed (expected if not logged in yet):", authError.message);
+                const accessToken = getCookie('access_token');
+                try {
+                    const userData = await getUserInfo(accessToken);
+                    if (userData.user) {
+                        setUser(userData.user);
+                        setIsLoggedIn(true);
+                        console.log("User info fetched successfully:", userData.user);
+                    } else {
+                        setUser(null);
+                        setIsLoggedIn(false);
+                        console.log("No user data on initial fetch.");
+                    }
+                } catch (authError) {
+                    console.warn("User info fetch failed (expected if not logged in yet):", authError.message);
+                    setUser(null);
+                    setIsLoggedIn(false);
+                }
+            } catch (error) {
+                console.error("Auth check failed during initial data fetch:", error);
+                setIsLoggedIn(false);
+                setUser(null);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error("Auth check failed during initial data fetch:", error);
-            setIsLoggedIn(false);
-            setUser(null);
-            setCsrfToken(null);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        };
 
     const login = async (email, password) => {
         try {
-            let currentCsrf = csrfToken;
-            if (!currentCsrf) {
-                await axios.get(`http://localhost:8000/api/users/csrf-token/`, { withCredentials: true });
-                currentCsrf = getCookie('csrftoken');
-                if (!currentCsrf) throw new Error("CSRF token missing for login.");
-                setCsrfToken(currentCsrf);
-            }
-            const responseData = await loginUser(email, password, currentCsrf);
+            const responseData = await loginUser(email, password);
             setUser(responseData.user);
             setIsLoggedIn(true);
             console.log("Login successful, user set:", responseData.user);
@@ -71,42 +59,28 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        try {
-            let currentCsrf = csrfToken;
-            if (!currentCsrf) {
-                await axios.get(`http://localhost:8000/api/users/csrf-token/`, { withCredentials: true });
-                currentCsrf = getCookie('csrftoken');
-                if (currentCsrf) setCsrfToken(currentCsrf);
+            try {
+                // Spróbuj wylogować się na backendzie. Jeśli refresh_token jest obecny, zostanie użyty.
+                const response = await logoutUser();
+                console.log("Backend logout API call successful (status:", response?.status, ').');
+            } catch (error) {
+                console.error("Logout API call failed:", error);
+                // Nie traktujemy błędu wylogowania backendu jako krytycznego dla wylogowania frontendowego.
+                // Nawet jeśli się nie uda, wyczyścimy ciasteczka lokalnie.
+            } finally {
+                deleteAuthCookies();
+                setUser(null);
+                setIsLoggedIn(false);
+                console.log('Frontend: Relevant cookies explicitly deleted after logout.');
+                router.push('/');
             }
-            const response = await logoutUser(currentCsrf);
-            setUser(null);
-            setIsLoggedIn(false);
-            setCsrfToken(null);
-            console.log("Backend logout API call successful (status:", response?.status, ').');
-            deleteAuthCookies();
-            console.log('Frontend: Relevant cookies explicitly deleted after logout.');
-            router.push('/login');
-        } catch (error) {
-            console.error("Logout failed in AuthContext:", error);
-            setUser(null);
-            setIsLoggedIn(false);
-            setCsrfToken(null);
-        }
-    };
+        };
 
     const refresh = async () => {
         try {
-            let currentCsrf = csrfToken;
-            if (!currentCsrf) {
-                await axios.get(`http://localhost:8000/api/users/csrf-token/`, { withCredentials: true });
-                currentCsrf = getCookie('csrftoken');
-                if (!currentCsrf) throw new Error("CSRF token missing for refresh.");
-                setCsrfToken(currentCsrf);
-            }
-            const response = await refreshToken(currentCsrf);
+            const response = await refreshToken();
             if (response?.access) {
                 console.log("Token refreshed successfully:", response);
-                // Backend ustawił nowe ciasteczko access_token, więc teraz możemy pobrać info o użytkowniku
                 await fetchUserInfoAfterRefresh();
             } else {
                 console.warn("Token refresh successful, but no access token in response.");
@@ -124,7 +98,12 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUserInfoAfterRefresh = async () => {
         try {
-            const userData = await getUserInfo();
+            const accessToken = getCookie('access_token'); // Pobierz token bezpośrednio z ciasteczka
+            if (!accessToken) {
+                console.warn("fetchUserInfoAfterRefresh: No access token found in cookies.");
+                return;
+            }
+            const userData = await getUserInfo(accessToken); // Przekaż token do getUserInfo
             setUser(userData.user);
             setIsLoggedIn(true);
             console.log("User info fetched after refresh:", userData.user);
@@ -141,7 +120,7 @@ export const AuthProvider = ({ children }) => {
         fetchInitialData();
 
         const intervalId = setInterval(() => {
-            console.log("AuthContext: Interval tick."); // Dodany log wewnątrz interwału
+            console.log("AuthContext: Interval tick.");
             refresh();
         }, 120000); // Co 2 minuty
 
@@ -155,7 +134,6 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         refreshToken: refresh,
-        csrfToken,
         isSessionExpired,
         resetSessionExpired: () => setIsSessionExpired(false),
     };
