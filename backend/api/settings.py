@@ -1,6 +1,10 @@
-
 from pathlib import Path
 from datetime import timedelta
+import os # Importuj os do zmiennych środowiskowych
+from dotenv import load_dotenv # Importuj load_dotenv
+
+# Załaduj zmienne środowiskowe z pliku .env
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,13 +14,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-kr%3nu7f@hs9v9b!zm%%cbrmazi)y-f-r+z*bsm#ju535ah-p%'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-kr%3nu7f@hs9v9b!zm%%cbrmazi)y-f-r+z*bsm#ju535ah-p%') # Odczytaj z .env
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True' # Odczytaj z .env
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') # Odczytaj z .env
 
 # Application definition
 
@@ -72,11 +75,21 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql', # Zmieniono na postgresql
+        'NAME': os.getenv('DB_NAME', 'your_db_name'), # Odczytaj z .env
+        'USER': os.getenv('DB_USER', 'your_db_user'), # Odczytaj z .env
+        'PASSWORD': os.getenv('DB_PASSWORD', 'your_db_password'), # Odczytaj z .env
+        'HOST': os.getenv('DB_HOST', 'localhost'), # Odczytaj z .env
+        'PORT': os.getenv('DB_PORT', '5432'), # Odczytaj z .env
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -120,6 +133,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.CustomUser'
 
+# settings.py
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -127,12 +141,13 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication', # Zakomentowano
         'users.authentication.CookieJWTAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication', # Odkomentowano
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
+        #'rest_framework.permissions.IsAuthenticatedOrReadOnly',   # Umożliwia dostęp do niektórych endpointów bez uwierzytelnienia
     ),
 }
 
