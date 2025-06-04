@@ -1,19 +1,16 @@
 "use client"; // Ważne dla użycia hooków Reacta
 
-import React, { useContext } from 'react'; // <-- Zmienione: Importujemy useContext
+import React, { useContext } from 'react';
 import Navbar from '../components/Navbar';
 import Blog from '../components/Blog';
-import HelloUser from '../components/HelloUser';
-import { AuthContext } from '../store/AuthContext'; // <-- Zmienione: Importujemy TYLKO AuthContext
+// import HelloUser from '../components/HelloUser'; // Zakomentowano import komponentu HelloUser
+import HeroSection from '../components/HeroSection';
+import { AuthContext } from '../store/AuthContext';
 import Footer from '../components/Footer'; // Importujemy komponent Footer
 
 export default function Home() {
     // Używamy useContext, aby uzyskać dostęp do stanu uwierzytelnienia z AuthContext
     const { user, isLoggedIn, isLoading } = useContext(AuthContext);
-
-    // Usuwamy useState i useEffect, ponieważ AuthContext już zarządza stanem user i isLoading
-    // const [user, setUser] = useState(null);
-    // useEffect(() => { ... });
 
     // Wyświetl komunikat ładowania, jeśli AuthContext jeszcze się inicjalizuje
     if (isLoading) {
@@ -29,13 +26,14 @@ export default function Home() {
 
     return (
         <div>
-            
             <Navbar />
-            <HelloUser user={user} isLoggedIn={isLoggedIn} />
+            {/* <HelloUser user={user} isLoggedIn={isLoggedIn} /> */} {/* Zakomentowano użycie komponentu HelloUser */}
+            <HeroSection />
+            {/* Usunięto tymczasowy div, który wymuszał przewijanie */}
             <div>
                 <Blog />
             </div>
-            <Footer /> 
+            <Footer />
         </div>
     );
 }

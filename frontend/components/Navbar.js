@@ -1,8 +1,8 @@
-"use client"; // Ten komponent musi być Client Component
+"use client"; // This component must be a Client Component
 
 import React, { useState, useContext } from 'react';
-import Link from 'next/link'; // Komponent do nawigacji po stronach w Next.js
-import { AuthContext } from '@/store/AuthContext'; // Importuj obiekt kontekstu
+import Link from 'next/link'; // Next.js Link component for page navigation
+import { AuthContext } from '@/store/AuthContext'; // Import the AuthContext object
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,7 +18,7 @@ function Navbar() {
     const handleLogout = async () => {
         try {
             await logout();
-            setIsMenuOpen(false); // Zamknij menu po wylogowaniu
+            setIsMenuOpen(false); // Close menu after logout
         } catch (error) {
             console.error("Logout failed:", error);
         }
@@ -31,25 +31,25 @@ function Navbar() {
     return (
         <header className="bg-gray-800 text-white p-4 shadow-md">
             <nav className="container mx-auto flex justify-between items-center">
-                {/* Lewa strona: Logo/Nazwa aplikacji */}
+                {/* Left side: Logo/App name */}
                 <div className="text-lg md:text-base lg:text-lg font-bold">
                     <Link href="/" className="hover:text-gray-300">
                         AI Algo Trader
                     </Link>
                 </div>
 
-                {/* Środkowa część (widoczna na większych ekranach) */}
+                {/* Middle section (visible on larger screens) */}
                 <div className="hidden md:flex space-x-4">
                     <Link href="#" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link1</Link>
                     <Link href="#" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link 2</Link>
                     {isAdminOrStaff && (
-                        <Link href="/blog/add" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Dodaj artykuł</Link>
+                        <Link href="/blog/add" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Add Article</Link>
                     )}
                 </div>
 
-                {/* Prawa strona: Hamburger menu (małe ekrany) i przyciski logowania/wylogowania */}
+                {/* Right side: Hamburger menu (small screens) and login/logout buttons */}
                 <div className="flex items-center space-x-4">
-                    {/* Hamburger menu dla małych ekranów */}
+                    {/* Hamburger menu for small screens */}
                     <div className="md:hidden">
                         <button onClick={toggleMenu} className="focus:outline-none">
                             <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
@@ -62,11 +62,11 @@ function Navbar() {
                         </button>
                     </div>
 
-                    {/* Przyciski logowania/wylogowania (widoczne zawsze na większych ekranach) */}
-                    {isLoading && <span className="text-gray-500 hidden md:inline md:text-sm lg:text-base">Ładowanie...</span>}
+                    {/* Login/Logout buttons (always visible on larger screens) */}
+                    {isLoading && <span className="text-gray-500 hidden md:inline md:text-sm lg:text-base">Loading...</span>}
                     {isLoggedIn && user ? (
                         <span className="text-gray-300 hidden md:inline md:text-sm lg:text-base">
-                            Witaj, {user.nickname || user.username || user.email}!
+                            Welcome, {user.nickname || user.username || user.email}!
                         </span>
                     ) : null}
 
@@ -97,7 +97,7 @@ function Navbar() {
                 </div>
             </nav>
 
-            {/* Menu mobilne (rozwijane z animacją) - tutaj dodajemy link */}
+            {/* Mobile menu (animated slide-out) - here we add the link */}
             <div className={`md:hidden fixed top-0 left-0 w-full h-full bg-gray-800 z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-4">
                     <div className="flex justify-end mb-4">
@@ -110,12 +110,12 @@ function Navbar() {
                     <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link1</Link>
                     <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link2</Link>
                     {isAdminOrStaff && (
-                        <Link href="/blog/add" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Dodaj artykuł</Link>
+                        <Link href="/blog/add" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Add Article</Link>
                     )}
-                    {isLoading && <span className="text-gray-500 block py-2 text-center md:text-sm">Ładowanie...</span>}
+                    {isLoading && <span className="text-gray-500 block py-2 text-center md:text-sm">Loading...</span>}
                     {isLoggedIn && user ? (
                         <span className="text-gray-300 block py-2 text-center md:text-sm">
-                            Witaj, {user.nickname || user.username || user.email}!
+                            Welcome, {user.nickname || user.username || user.email}!
                         </span>
                     ) : null}
                     {isLoggedIn ? (
