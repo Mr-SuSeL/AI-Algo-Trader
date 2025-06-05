@@ -1,3 +1,4 @@
+// app/blog/[slug]/ArticleDetailClient.js
 "use client";
 
 import React, { useContext, useState } from 'react';
@@ -58,7 +59,14 @@ function ArticleDetailClient({ article }) {
     return (
         <div className="max-w-4xl mx-auto p-6 relative">
             <h1 className="text-4xl font-bold text-blue-600 mb-4">{article?.title}</h1>
-            <p className="text-gray-800 text-lg mb-4">{article?.content}</p>
+
+            {/* ZMIENIONY BLOK KODU */}
+            {/* Usunięto dodatkowy div wewnątrz kontenera prose */}
+            <div
+                className="prose max-w-none text-gray-800 text-lg mb-4"
+                dangerouslySetInnerHTML={{ __html: article?.content || '' }}
+            />
+
             <p className="text-sm text-gray-500">Author: {article?.author?.nickname || article?.author?.username || 'Unknown'}</p>
             <p className="text-sm text-gray-500">Published: {article?.published ? new Date(article.published).toLocaleDateString() : 'N/A'}</p>
 
@@ -88,10 +96,8 @@ function ArticleDetailClient({ article }) {
             </div>
 
             {showDeleteModal && (
-                <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center"
-                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
-                >
-                    <div className="bg-white p-6 rounded-md shadow-xl">
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+                    <div className="bg-white p-6 rounded-md shadow-xl max-w-sm w-full">
                         <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
                         <p className="mb-4">Are you sure you want to delete this article?</p>
                         <div className="flex justify-end gap-4">

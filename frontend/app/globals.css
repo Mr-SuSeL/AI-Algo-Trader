@@ -1,8 +1,10 @@
+/* frontend/app/globals.css */
+
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ffffff; /* Jasne tło strony w trybie jasnym */
+  --foreground: #171717; /* Ciemny tekst strony w trybie jasnym */
 }
 
 @theme inline {
@@ -10,17 +12,158 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Jawne definicje KOLORÓW SZAROŚCI (Tryb Jasny - im wyższa liczba, tym ciemniejszy) */
+  --color-gray-50: #f9fafb; /* Bardzo jasny */
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937; /* Ciemny, idealny dla tła Navbara */
+  --color-gray-900: #111827; /* Bardzo ciemny, idealny dla jeszcze ciemniejszego tła */
+
+  /* Kolory dla linków i ikon (standardowe, aby dobrze kontrastowały na ciemnym tle) */
+  --color-blue-400: #60a5fa; /* Jasny niebieski */
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+
+  --color-sky-400: #38bdf8;
+  --color-sky-500: #0ea5e9;
+  --color-sky-600: #0284c7;
+
+  --color-pink-400: #f472b6;
+  --color-pink-500: #ec4899;
+  --color-pink-600: #db2777;
+
+  --color-purple-400: #c084fc;
+  --color-purple-500: #a855f7;
+  --color-purple-600: #9333ea;
+
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+
+  /* Reszta zmiennych dla text-size, font-weight, radius */
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+  --radius-md: 0.375rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0a0a; /* To jest tło dla całej strony w trybie ciemnym */
+    --foreground: #ededed; /* To jest domyślny kolor tekstu dla całej strony w trybie ciemnym */
+  }
+  @theme inline {
+    /* Kolory szarości w TRYBIE CIEMNYM (im wyższa liczba, tym JAŚNIEJSZY) */
+    /* To odwraca logikę dla szarości, aby na ciemnym tle 50 było ciemne, a 900 jasne. */
+    /* Dzięki temu klasy takie jak text-gray-50 będą faktycznie jasne na ciemnym tle. */
+    --color-gray-50: #ededed; /* Najjaśniejszy w trybie ciemnym (prawie biały) - dla tekstu */
+    --color-gray-100: #d1d5db;
+    --color-gray-200: #9ca3af;
+    --color-gray-300: #6b7280;
+    --color-gray-400: #4b5563;
+    --color-gray-500: #374151;
+    --color-gray-600: #1f2937;
+    --color-gray-700: #111827; /* Ciemny w trybie ciemnym */
+    --color-gray-800: #0a0a0a; /* Bardzo ciemny (prawie czarny) - dla tła Navbara */
+    --color-gray-900: #000000; /* Całkowicie czarny */
+
+
+    /* Kolory dla linków i ikon w trybie ciemnym (teraz będą jaśniejsze i lepiej widoczne na ciemnym tle) */
+    --color-blue-400: #93c5fd;
+    --color-blue-500: #60a5fa;
+    --color-blue-600: #3b82f6;
+    --color-blue-700: #2563eb;
+
+    --color-sky-400: #7dd3fc;
+    --color-sky-500: #38bdf8;
+    --color-sky-600: #0ea5e9;
+
+    --color-pink-400: #f87171;
+    --color-pink-500: #fb7185;
+    --color-pink-600: #f472b6;
+
+    --color-purple-400: #c4b5fd;
+    --color-purple-500: #a78bfa;
+    --color-purple-600: #8b5cf6;
+
+    --color-red-500: #f87171; /* Jaśniejszy czerwony */
+    --color-red-600: #ef4444;
+    --color-red-700: #dc2626;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+}
+
+/* --- Sekcja dla stylów .prose --- */
+@layer components {
+  .prose {
+    color: var(--color-gray-700);
+    max-width: 65ch;
+    line-height: 1.75;
+    font-size: var(--text-base);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1rem;
+  }
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: var(--color-gray-900);
+    margin-top: 1.2em;
+    margin-bottom: 0.8em;
+    line-height: 1.2;
+    font-weight: var(--font-weight-bold);
+  }
+  .prose h1 { font-size: var(--text-4xl); }
+  .prose h2 { font-size: var(--text-3xl); }
+  .prose h3 { font-size: var(--text-2xl); }
+  .prose p { margin-top: 1em; margin-bottom: 1em; }
+  .prose ul, .prose ol {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+  }
+  .prose ul { list-style-type: disc; }
+  .prose ol { list-style-type: decimal; }
+  .prose li { margin-bottom: 0.5em; }
+  .prose a {
+    color: var(--color-blue-600);
+    text-decoration: underline;
+  }
+  .prose strong { font-weight: var(--font-weight-bold); }
+  .prose code {
+    background-color: var(--color-gray-100);
+    padding: 0.2em 0.4em;
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+  }
+  .prose pre {
+    background-color: var(--color-gray-800);
+    color: var(--color-gray-100);
+    padding: 1em;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+  }
+  .prose blockquote {
+    border-left: 4px solid var(--color-gray-300);
+    padding-left: 1em;
+    margin-left: 0;
+    margin-right: 0;
+    font-style: italic;
+    color: var(--color-gray-500);
+  }
 }

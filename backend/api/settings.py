@@ -1,30 +1,20 @@
+# api/settings.py
+
 from pathlib import Path
 from datetime import timedelta
-import os # Importuj os do zmiennych środowiskowych
-from dotenv import load_dotenv # Importuj load_dotenv
+import os
+from dotenv import load_dotenv
 
-# Załaduj zmienne środowiskowe z pliku .env
-load_dotenv()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-kr%3nu7f@hs9v9b!zm%%cbrmazi)y-f-r+z*bsm#ju535ah-p%') # Odczytaj z .env
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True' # Odczytaj z .env
-
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') # Odczytaj z .env
-
-# Application definition
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-...')
+DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
-    "corsheaders",
+    'django_ckeditor_5',            # <— tutaj
+    'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework_simplejwt',
     'rest_framework',
@@ -38,14 +28,13 @@ INSTALLED_APPS = [
     'articles',
 ]
 
-
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",           # Zawsze na samej górze
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',       
-    'django.middleware.csrf.CsrfViewMiddleware',       # Po SessionMiddleware
-    'django.contrib.auth.middleware.AuthenticationMiddleware', # Po CsrfViewMiddleware
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -69,71 +58,132 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql', # Zmieniono na postgresql
-        'NAME': os.getenv('DB_NAME', 'your_db_name'), # Odczytaj z .env
-        'USER': os.getenv('DB_USER', 'your_db_user'), # Odczytaj z .env
-        'PASSWORD': os.getenv('DB_PASSWORD', 'your_db_password'), # Odczytaj z .env
-        'HOST': os.getenv('DB_HOST', 'localhost'), # Odczytaj z .env
-        'PORT': os.getenv('DB_PORT', '5432'), # Odczytaj z .env
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'your_db_name'),
+        'USER': os.getenv('DB_USER', 'your_db_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'your_db_password'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
+STATIC_URL = '/static/'
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# ‣ Media (gdzie będą zapisywane pliki z uploadu)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-STATIC_URL = 'static/'
+# (opcjonalnie) Jeśli chcesz dodać własne style CSS dla CKEditor:
+# CKEDITOR_5_CUSTOM_CSS = 'path_to.css'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+# (opcjonalnie) Jeśli chcesz własne przechowywanie plików:
+# CKEDITOR_5_FILE_STORAGE = "myapp.storage.CustomStorage"
+
+# (opcjonalnie) Ograniczenie kto może uploadować:
+# CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"  # możliwe: "staff", "authenticated", "any"
+
+# Konfiguracja samego CKEditor 5:
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'toolbar': {
+            'items': [
+                'heading', '|', 'bold', 'italic', 'link',
+                'bulletedList', 'numberedList', 'blockQuote', 'imageUpload',
+            ],
+        },
+        'language': 'en',
+    },
+    'extends': {
+        'blockToolbar': [
+            'paragraph', 'heading1', 'heading2', 'heading3',
+            '|',
+            'bulletedList', 'numberedList',
+            '|',
+            'blockQuote',
+        ],
+        'toolbar': {
+            'items': [
+                'heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link',
+                'underline', 'strikethrough', 'code', 'subscript', 'superscript',
+                'highlight', '|', 'codeBlock', 'sourceEditing', 'imageUpload',
+                'bulletedList', 'numberedList', 'todoList', '|', 'blockQuote',
+                'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor',
+                'mediaEmbed', 'removeFormat', 'insertTable', 'undo', 'redo',
+            ],
+            'shouldNotGroupWhenFull': True,
+        },
+        'image': {
+            'toolbar': [
+                'imageTextAlternative', '|',
+                'imageStyle:alignLeft', 'imageStyle:alignRight',
+                'imageStyle:alignCenter', 'imageStyle:side', '|'
+            ],
+            'styles': [
+                'full', 'side', 'alignLeft', 'alignRight', 'alignCenter'
+            ],
+        },
+        'table': {
+            'contentToolbar': [
+                'tableColumn', 'tableRow', 'mergeTableCells',
+                'tableProperties', 'tableCellProperties'
+            ],
+            'tableProperties': {
+                # przykładowy paleta kolorów
+                'borderColors': [
+                    {'color': 'hsl(4, 90%, 58%)', 'label': 'Red'},
+                    {'color': 'hsl(340, 82%, 52%)', 'label': 'Pink'},
+                    {'color': 'hsl(291, 64%, 42%)', 'label': 'Purple'},
+                ],
+                'backgroundColors': [
+                    {'color': 'hsl(207, 90%, 54%)', 'label': 'Blue'},
+                    {'color': 'hsl(231, 48%, 48%)', 'label': 'Indigo'},
+                ],
+            },
+            'tableCellProperties': {
+                'borderColors': [
+                    {'color': 'hsl(4, 90%, 58%)', 'label': 'Red'},
+                    {'color': 'hsl(340, 82%, 52%)', 'label': 'Pink'},
+                ],
+                'backgroundColors': [
+                    {'color': 'hsl(207, 90%, 54%)', 'label': 'Blue'},
+                    {'color': 'hsl(231, 48%, 48%)', 'label': 'Indigo'},
+                ],
+            },
+        },
+        'heading': {
+            'options': [
+                {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
+                {'model': 'heading1',  'view': 'h1',       'title': 'Heading 1', 'class': 'ck-heading_heading1'},
+                {'model': 'heading2',  'view': 'h2',       'title': 'Heading 2', 'class': 'ck-heading_heading2'},
+                {'model': 'heading3',  'view': 'h3',       'title': 'Heading 3', 'class': 'ck-heading_heading3'},
+            ],
+        },
+    },
+    'list': {
+        'properties': {
+            'styles': True,
+            'startIndex': True,
+            'reversed': True,
+        }
+    }
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.CustomUser'
-
-# settings.py
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -141,13 +191,11 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework.authentication.SessionAuthentication', # Zakomentowano
         'users.authentication.CookieJWTAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication', # Odkomentowano
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-        #'rest_framework.permissions.IsAuthenticatedOrReadOnly',   # Umożliwia dostęp do niektórych endpointów bez uwierzytelnienia
     ),
 }
 
@@ -158,14 +206,10 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
 }
 
-#CORS_ALLOW_ALL_ORIGINS = True # usuń na produkcję
-CORS_ALLOW_CREDENTIALS = True # cors dla ciasteczek
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
-
-# CSRF_TRUSTED_ORIGINS - aby Django akceptowało CSRF z Twojego frontendu
-# Muszą być to domeny/adresy, z których przychodzą żądania frontendu
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
 ]

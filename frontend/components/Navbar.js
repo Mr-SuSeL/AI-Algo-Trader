@@ -29,30 +29,46 @@ function Navbar() {
     };
 
     return (
-        <header className="bg-gray-800 text-white p-4 shadow-md">
+        // Tło Navbara: bg-gray-800 (ciemny) w trybie jasnym.
+        // Tekst Navbara: text-gray-100 (jasny) w trybie jasnym.
+        // W trybie ciemnym (dark:):
+        //   bg-gray-900 (najciemniejszy zdefiniowany)
+        //   text-gray-100 (co w trybie ciemnym jest zdefiniowane jako #262626, więc to jest problem - zmienimy na text-gray-700, które jest #e5e7eb)
+        <header className="bg-gray-800 text-gray-100 p-4 shadow-md dark:bg-gray-900 dark:text-gray-700">
             <nav className="container mx-auto flex justify-between items-center">
                 {/* Left side: Logo/App name */}
                 <div className="text-lg md:text-base lg:text-lg font-bold">
-                    <Link href="/" className="hover:text-gray-300">
+                    {/* Logo: Jasny tekst, hover: niebieski. W trybie ciemnym: jaśniejszy tekst, hover: jasny niebieski. */}
+                    <Link href="/" className="text-gray-100 hover:text-blue-400 dark:text-gray-700 dark:hover:text-blue-400">
                         AI Algo Trader
                     </Link>
                 </div>
 
                 {/* Middle section (visible on larger screens) */}
                 <div className="hidden md:flex space-x-4">
-                    <Link href="#" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link1</Link>
-                    <Link href="#" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Link 2</Link>
+                    {/* Linki nawigacyjne w głównej części: */}
+                    {/* Domyślny kolor tekstu: text-gray-100 (jasny). */}
+                    {/* Obramowanie: ring-gray-600 (średnio ciemny szary - widoczny na tle gray-800). */}
+                    {/* Hover: tło ciemniejszy szary (gray-700), tekst biały, obramowanie ciemniejszy szary. */}
+                    {/* W trybie ciemnym: tekst text-gray-700 (jasny). Obramowanie ring-gray-400 (jaśniejsze). */}
+                    {/* Hover w trybie ciemnym: bg-gray-800 (ciemny), text-gray-700 (jasny), ring-gray-800. */}
+                    <Link href="#" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
+                                            dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link1</Link>
+                    <Link href="#" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
+                                            dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link2</Link>
                     {isAdminOrStaff && (
-                        <Link href="/blog/add" className="ring ring-gray-200 opacity-70 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 hover:font-bold md:text-sm lg:text-base">Add Article</Link>
+                        <Link href="/blog/add" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
+                                                    dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Add Article</Link>
                     )}
                 </div>
 
                 {/* Right side: Hamburger menu (small screens) and login/logout buttons */}
                 <div className="flex items-center space-x-4">
-                    {/* Hamburger menu for small screens */}
+                    {/* Hamburger menu dla małych ekranów */}
                     <div className="md:hidden">
+                        {/* Ikona hamburgera będzie dziedziczyć kolor z rodzica (text-gray-100 / dark:text-gray-700) */}
                         <button onClick={toggleMenu} className="focus:outline-none">
-                            <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
                                 {isMenuOpen ? (
                                     <path fillRule="evenodd" clipRule="evenodd" d="M18.278 16.864a1 1 0 0 1-1.414 1.414l-4.829-4.828-4.828 4.828a1 1 0 0 1-1.414-1.414l4.828-4.829-4.828-4.828a1 1 0 0 1 1.414-1.414l4.829 4.828 4.828-4.828a1 1 0 0 1 1.414 1.414l-4.828 4.829z"/>
                                 ) : (
@@ -62,10 +78,10 @@ function Navbar() {
                         </button>
                     </div>
 
-                    {/* Login/Logout buttons (always visible on larger screens) */}
-                    {isLoading && <span className="text-gray-500 hidden md:inline md:text-sm lg:text-base">Loading...</span>}
+                    {/* Przyciski Login/Logout (widoczne na większych ekranach) */}
+                    {isLoading && <span className="text-gray-300 hidden md:inline md:text-sm lg:text-base dark:text-gray-400">Loading...</span>}
                     {isLoggedIn && user ? (
-                        <span className="text-gray-300 hidden md:inline md:text-sm lg:text-base">
+                        <span className="text-gray-200 hidden md:inline md:text-sm lg:text-base dark:text-gray-300">
                             Welcome, {user.nickname || user.username || user.email}!
                         </span>
                     ) : null}
@@ -73,7 +89,11 @@ function Navbar() {
                     {isLoggedIn ? (
                         <button
                             onClick={handleLogout}
-                            className="bg-red-500 hover:bg-red-600 hover:font-bold text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base"
+                            // Przyciski: Używamy zdefiniowanych w globals.css kolorów akcentów.
+                            // Hover: ciemniejszy odcień.
+                            // W trybie ciemnym: jaśniejsze odcienie.
+                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base
+                                       dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
                             disabled={isLoading}
                         >
                             Log out
@@ -82,13 +102,15 @@ function Navbar() {
                         <>
                             <Link
                                 href="/login"
-                                className="bg-green-600 hover:bg-white hover:text-green-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base"
+                                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base
+                                           dark:bg-green-700 dark:hover:bg-green-600 dark:text-white"
                             >
                                 Log in
                             </Link>
                             <Link
                                 href="/register"
-                                className="bg-yellow-600 hover:bg-white hover:text-yellow-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base"
+                                className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base
+                                           dark:bg-yellow-700 dark:hover:bg-yellow-600 dark:text-white"
                             >
                                 Register
                             </Link>
@@ -97,24 +119,31 @@ function Navbar() {
                 </div>
             </nav>
 
-            {/* Mobile menu (animated slide-out) - here we add the link */}
-            <div className={`md:hidden fixed top-0 left-0 w-full h-full bg-gray-800 z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            {/* Mobile menu (animated slide-out) */}
+            {/* Tło menu mobilnego zgodne z Navbarem */}
+            <div className={`md:hidden fixed top-0 left-0 w-full h-full bg-gray-800 z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+                            dark:bg-gray-900`}>
                 <div className="p-4">
                     <div className="flex justify-end mb-4">
+                        {/* Ikona zamknięcia menu: dziedziczy kolor tekstu paska nawigacyjnego */}
                         <button onClick={toggleMenu} className="focus:outline-none">
-                            <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 fill-current text-gray-100 dark:text-gray-700" viewBox="0 0 24 24">
                                 <path fillRule="evenodd" clipRule="evenodd" d="M18.278 16.864a1 1 0 0 1-1.414 1.414l-4.829-4.828-4.828 4.828a1 1 0 0 1-1.414-1.414l4.828-4.829-4.828-4.828a1 1 0 0 1 1.414-1.414l4.829 4.828 4.828-4.828a1 1 0 0 1 1.414 1.414l-4.828 4.829z"/>
                             </svg>
                         </button>
                     </div>
-                    <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link1</Link>
-                    <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Link2</Link>
+                    {/* Linki w menu mobilnym: zachowują się jak linki główne */}
+                    <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
+                                            dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link1</Link>
+                    <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
+                                            dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link2</Link>
                     {isAdminOrStaff && (
-                        <Link href="/blog/add" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 md:py-1 md:px-2 rounded text-center ring ring-gray-200 opacity-50 mb-2 hover:bg-gray-300 hover:text-gray-800 hover:ring-gray-300 md:text-sm">Add Article</Link>
+                        <Link href="/blog/add" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
+                                                            dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Add Article</Link>
                     )}
-                    {isLoading && <span className="text-gray-500 block py-2 text-center md:text-sm">Loading...</span>}
+                    {isLoading && <span className="text-gray-300 block py-2 text-center md:text-sm dark:text-gray-400">Loading...</span>}
                     {isLoggedIn && user ? (
-                        <span className="text-gray-300 block py-2 text-center md:text-sm">
+                        <span className="text-gray-200 block py-2 text-center md:text-sm dark:text-gray-300">
                             Welcome, {user.nickname || user.username || user.email}!
                         </span>
                     ) : null}
@@ -122,7 +151,8 @@ function Navbar() {
                         <div className="text-center">
                             <button
                                 onClick={handleLogout}
-                                className="bg-red-500 my-4 hover:bg-red-600 hover:font-bold text-white font-bold py-2 px-4 md:py-1 md:px-2 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full text-center md:text-sm"
+                                className="bg-red-500 my-4 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full text-center md:text-sm
+                                           dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
                                 disabled={isLoading}
                             >
                                 Log out
@@ -133,7 +163,8 @@ function Navbar() {
                             <div className="mb-2">
                                 <Link
                                     href="/login"
-                                    className="inline-block bg-green-600 hover:bg-white hover:text-green-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm"
+                                    className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm
+                                               dark:bg-green-700 dark:hover:bg-green-600 dark:text-white"
                                 >
                                     Log in
                                 </Link>
@@ -141,7 +172,8 @@ function Navbar() {
                             <div>
                                 <Link
                                     href="/register"
-                                    className="inline-block bg-yellow-600 hover:bg-white hover:text-yellow-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm"
+                                    className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm
+                                               dark:bg-yellow-700 dark:hover:bg-yellow-600 dark:text-white"
                                 >
                                     Register
                                 </Link>

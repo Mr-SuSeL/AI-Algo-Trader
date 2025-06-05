@@ -1,28 +1,64 @@
 # backend/articles/serializers.py
+
 from rest_framework import serializers
 from .models import Article
 from users.serializers import CustomUserSerializer
 
 class ArticleListSerializer(serializers.ModelSerializer):
-    author = CustomUserSerializer(read_only=True) # Użyj CustomUserSerializer dla autora
+    author = CustomUserSerializer(read_only=True)  # Zagnieżdżony serializer dla autora
 
     class Meta:
         model = Article
-        fields = ('id', 'title', 'description', 'slug', 'author', 'published')
-        # Teraz 'author' będzie zawierał dane użytkownika, w tym 'nickname'
+        fields = (
+            'id',
+            'title',
+            'description',
+            'slug',
+            'author',
+            'published',
+        )
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
-    author = CustomUserSerializer(read_only=True) # Także w detail
+    author = CustomUserSerializer(read_only=True)
+    author_username = serializers.CharField(source='author.username', read_only=True)
+
+    # *** KLUCZOWA ZMIANA: Jawne zdefiniowanie pola 'content' ***
+    # Domyślnie Django REST Framework nie ucieka HTML w CharField.
+    # Upewniamy się, że to pole jest traktowane jako zwykły string
+    # bez dodatkowego uciekania. Jeśli ma być tylko do odczytu przez API,
+    # możesz dodać read_only=True.
+    content = serializers.CharField(allow_null=True, allow_blank=True)
+
+
     class Meta:
         model = Article
-        fields = '__all__' # Zawiera wszystkie pola modelu
+        fields = (
+            'id',
+            'title',
+            'description',
+            'content', # Pole 'content' nadal musi być wymienione w 'fields'
+            'slug',
+            'author',
+            'author_username',
+            'published',
+            'updated_article',
+        )
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializator używany przy tworzeniu nowego artykułu.
+    Autor (pole `author`) będzie ustawiany po stronie widoku
+    przez np. request.user, więc nie ma go tutaj w polach.
+    """
     class Meta:
         model = Article
         fields = ('title', 'description', 'content')
 
 class ArticleUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializator używany przy aktualizacji artykułu.
+    Bez zmiany autora – zakładamy, że autor zostaje ten sam.
+    """
     class Meta:
         model = Article
         fields = ('title', 'description', 'content')

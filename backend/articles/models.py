@@ -1,17 +1,16 @@
+# articles/models.py
+
 from django.db import models
 from django.utils.text import slugify
-from django.utils import timezone
-from django.conf import settings # Dodaj ten import
+from django.conf import settings
+from django_ckeditor_5.fields import CKEditor5Field  # poprawny import
 
 class Article(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    content = models.TextField()
+    content = CKEditor5Field(config_name='extends')  # użycie CKEditor5Field
     slug = models.SlugField(unique=True, max_length=100, blank=True)
-    #author = models.CharField(max_length=100)
-    # For future for more authors:
-    #from django.contrib.auth.models import User # Usuń ten import
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) # Użyj settings.AUTH_USER_MODEL
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     published = models.DateTimeField(auto_now_add=True)
     updated_article = models.DateTimeField(auto_now=True)
 
@@ -19,12 +18,10 @@ class Article(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.slug:  # Generate slug only if don't exists
+        if not self.slug:
             base_slug = slugify(self.title)
             unique_slug = base_slug
             counter = 1
-
-            # checking unique slug in another titles - and add '-1', '-2' etc.
             while Article.objects.filter(slug=unique_slug).exists():
                 unique_slug = f"{base_slug}-{counter}"
                 counter += 1
@@ -33,5 +30,4 @@ class Article(models.Model):
 
     class Meta:
         ordering = ['-published']
-
 
