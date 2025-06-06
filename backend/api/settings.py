@@ -13,6 +13,8 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
+    # Aplikacje Django Channels powinny być na początku dla poprawnego działania
+    'channels', # Przeniesione na początek
     'django_ckeditor_5',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
@@ -26,7 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'articles',
-    'sorl.thumbnail', 
+    'sorl.thumbnail',
+    'chat', 
 ]
 
 MIDDLEWARE = [
@@ -84,22 +87,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# ‣ Media (gdzie będą zapisywane pliki z uploadu)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# (opcjonalnie) Jeśli chcesz dodać własne style CSS dla CKEditor:
-# CKEDITOR_5_CUSTOM_CSS = 'path_to.css'
-
-# KLUCZOWA ZMIANA: Określa, jak pliki mają być przechowywane przez CKEditor 5
 CKEDITOR_5_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
-# (opcjonalnie) Jeśli chcesz ograniczyć kto może uploadować:
-# CKEDITOR_5_FILE_UPLOAD_PERMISSION = "authenticated" # Zmienione z "staff" na "authenticated"
-                                                    # jeśli chcesz, aby wszyscy zalogowani mogli uploadować.
-                                                    # Domyślnie django_ckeditor_5 już wymaga uwierzytelnienia.
-
-# Konfiguracja samego CKEditor 5:
 CKEDITOR_5_CONFIGS = {
     'default': {
         'toolbar': {
@@ -122,7 +114,7 @@ CKEDITOR_5_CONFIGS = {
             'items': [
                 'heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link',
                 'underline', 'strikethrough', 'code', 'subscript', 'superscript',
-                'highlight', '|', 'codeBlock', 'sourceEditing', 'imageUpload', # 'imageUpload' jest już tutaj!
+                'highlight', '|', 'codeBlock', 'sourceEditing', 'imageUpload',
                 'bulletedList', 'numberedList', 'todoList', '|', 'blockQuote',
                 'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor',
                 'mediaEmbed', 'removeFormat', 'insertTable', 'undo', 'redo',
@@ -170,9 +162,9 @@ CKEDITOR_5_CONFIGS = {
         'heading': {
             'options': [
                 {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
-                {'model': 'heading1',  'view': 'h1',      'title': 'Heading 1', 'class': 'ck-heading_heading1'},
-                {'model': 'heading2',  'view': 'h2',      'title': 'Heading 2', 'class': 'ck-heading_heading2'},
-                {'model': 'heading3',  'view': 'h3',      'title': 'Heading 3', 'class': 'ck-heading_heading3'},
+                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1'},
+                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2'},
+                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3'},
             ],
         },
     },
@@ -216,3 +208,16 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+# JEDNA, POPRAWNA DEFINICJA ASGI_APPLICATION
+ASGI_APPLICATION = 'api.asgi.application'
+
+# JEDNA, POPRAWNA DEFINICJA CHANNEL_LAYERS - z Redisem
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)], # Domyślny port Redis
+        },
+    },
+}

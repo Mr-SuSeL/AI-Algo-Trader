@@ -1,0 +1,59 @@
+# docker-compose.yml w katalogu C:\AI-Algo-Trader
+version: '3.8'
+
+services:
+  # Definicja usługi backend (Django Channels/Daphne)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: algo-trader-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - venv_data:/app/venv
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - redis
+      - db # Dodajemy zależność od bazy danych
+    networks:
+      - algo_network
+
+  # Definicja usługi Redis
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: algo-trader-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - algo_network
+
+  # NOWA DEFINICJA USŁUGI DLA POSTGRESQL
+  db:
+    image: postgres:16-alpine
+    container_name: algo-trader-db
+    environment:
+      POSTGRES_DB: ${DB_NAME} # Pobierz wartość z .env
+      POSTGRES_USER: ${DB_USER} # Pobierz wartość z .env
+      POSTGRES_PASSWORD: ${DB_PASSWORD} # Pobierz wartość z .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - algo_network
+
+# Definicja woluminów
+volumes:
+  redis_data:
+  venv_data:
+  db_data: # Nowy wolumin dla danych PostgreSQL
+
+# Definicja sieci
+networks:
+  algo_network:
+    driver: bridge
