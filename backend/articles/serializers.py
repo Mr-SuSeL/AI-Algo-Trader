@@ -1,8 +1,10 @@
 # backend/articles/serializers.py
 
+import re # Importuj moduł re do wyrażeń regularnych
 from rest_framework import serializers
 from .models import Article
 from users.serializers import CustomUserSerializer
+from django.conf import settings # Importuj settings, aby użyć DEBUG i skonstruować URL
 
 class ArticleListSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)  # Zagnieżdżony serializer dla autora
@@ -43,6 +45,29 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             'published',
             'updated_article',
         )
+
+    # Dodajemy metodę to_representation, aby przetworzyć treść artykułu
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        content = representation.get('content') # Pobierz treść artykułu
+
+        if content:
+            # Upewnij się, że ten URL odpowiada adresowi, pod którym działa Twoje Django
+            # W trybie deweloperskim to zazwyczaj http://localhost:8000/
+            # W środowisku produkcyjnym będziesz musiał to zmienić na adres domeny Twojego API
+            # Możesz użyć zmiennej środowiskowej lub stałego adresu dla produkcji.
+            # Dla developementu użyjemy prostego localhost:8000
+            django_base_url = "http://localhost:8000"
+
+            # Wyrażenie regularne szuka 'src="' po którym następuje /media/ i cokolwiek innego (bez cudzysłowu).
+            # (?!https?://) to "negative lookahead" - upewnia się, że src nie zaczyna się już od http:// lub https://,
+            # zapobiegając podwójnemu dodawaniu prefixu do już absolutnych URL-i.
+            pattern = r'src="(?!https?://)(/media/[^"]*)"'
+            replacement = r'src="' + django_base_url + r'\1"'
+            representation['content'] = re.sub(pattern, replacement, content)
+
+        return representation
+
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
     """
