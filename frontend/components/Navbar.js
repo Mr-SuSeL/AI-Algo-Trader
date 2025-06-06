@@ -53,12 +53,13 @@ function Navbar() {
                     {/* W trybie ciemnym: tekst text-gray-700 (jasny). Obramowanie ring-gray-400 (jaśniejsze). */}
                     {/* Hover w trybie ciemnym: bg-gray-800 (ciemny), text-gray-700 (jasny), ring-gray-800. */}
                     <Link href="#" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
-                                            dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link1</Link>
-                    <Link href="#" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
-                                            dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link2</Link>
+                                             dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link1</Link>
+                    {/* Zmieniony Link2 na Chat */}
+                    <Link href="/chat" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
+                                             dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Chat</Link>
                     {isAdminOrStaff && (
                         <Link href="/blog/add" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
-                                                    dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Add Article</Link>
+                                                         dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Add Article</Link>
                     )}
                 </div>
 
@@ -93,7 +94,7 @@ function Navbar() {
                             // Hover: ciemniejszy odcień.
                             // W trybie ciemnym: jaśniejsze odcienie.
                             className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base
-                                       dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
+                                         dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
                             disabled={isLoading}
                         >
                             Log out
@@ -103,14 +104,14 @@ function Navbar() {
                             <Link
                                 href="/login"
                                 className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base
-                                           dark:bg-green-700 dark:hover:bg-green-600 dark:text-white"
+                                             dark:bg-green-700 dark:hover:bg-green-600 dark:text-white"
                             >
                                 Log in
                             </Link>
                             <Link
                                 href="/register"
                                 className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base
-                                           dark:bg-yellow-700 dark:hover:bg-yellow-600 dark:text-white"
+                                             dark:bg-yellow-700 dark:hover:bg-yellow-600 dark:text-white"
                             >
                                 Register
                             </Link>
@@ -122,7 +123,7 @@ function Navbar() {
             {/* Mobile menu (animated slide-out) */}
             {/* Tło menu mobilnego zgodne z Navbarem */}
             <div className={`md:hidden fixed top-0 left-0 w-full h-full bg-gray-800 z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-                            dark:bg-gray-900`}>
+                                 dark:bg-gray-900`}>
                 <div className="p-4">
                     <div className="flex justify-end mb-4">
                         {/* Ikona zamknięcia menu: dziedziczy kolor tekstu paska nawigacyjnego */}
@@ -134,12 +135,13 @@ function Navbar() {
                     </div>
                     {/* Linki w menu mobilnym: zachowują się jak linki główne */}
                     <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
-                                            dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link1</Link>
-                    <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
-                                            dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link2</Link>
+                                             dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link1</Link>
+                    {/* Zmieniony Link2 na Chat w menu mobilnym */}
+                    <Link href="/chat" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
+                                             dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Chat</Link>
                     {isAdminOrStaff && (
                         <Link href="/blog/add" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
-                                                            dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Add Article</Link>
+                                                             dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Add Article</Link>
                     )}
                     {isLoading && <span className="text-gray-300 block py-2 text-center md:text-sm dark:text-gray-400">Loading...</span>}
                     {isLoggedIn && user ? (
@@ -152,7 +154,7 @@ function Navbar() {
                             <button
                                 onClick={handleLogout}
                                 className="bg-red-500 my-4 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full text-center md:text-sm
-                                           dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
+                                             dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
                                 disabled={isLoading}
                             >
                                 Log out
@@ -164,7 +166,7 @@ function Navbar() {
                                 <Link
                                     href="/login"
                                     className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm
-                                               dark:bg-green-700 dark:hover:bg-green-600 dark:text-white"
+                                                 dark:bg-green-700 dark:hover:bg-green-600 dark:text-white"
                                 >
                                     Log in
                                 </Link>
@@ -173,7 +175,7 @@ function Navbar() {
                                 <Link
                                     href="/register"
                                     className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm
-                                               dark:bg-yellow-700 dark:hover:bg-yellow-600 dark:text-white"
+                                                 dark:bg-yellow-700 dark:hover:bg-yellow-600 dark:text-white"
                                 >
                                     Register
                                 </Link>

@@ -8,8 +8,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: algo-trader-backend
+    # Zmieniono mapowanie portów, aby Daphne nasłuchiwało na porcie 8001
     ports:
-      - "8000:8000"
+      - "8001:8001" # Host:Kontener - teraz Daphne będzie dostępne na 8001
     volumes:
       - ./backend:/app
       - venv_data:/app/venv
@@ -20,6 +21,8 @@ services:
       - db # Dodajemy zależność od bazy danych
     networks:
       - algo_network
+    # Dodano jawne polecenie uruchamiające Daphne na porcie 8001
+    command: python -m daphne api.asgi:application -b 0.0.0.0 -p 8001
 
   # Definicja usługi Redis
   redis:
@@ -32,7 +35,7 @@ services:
     networks:
       - algo_network
 
-  # NOWA DEFINICJA USŁUGI DLA POSTGRESQL
+  # Definicja usługi dla PostgreSQL
   db:
     image: postgres:16-alpine
     container_name: algo-trader-db

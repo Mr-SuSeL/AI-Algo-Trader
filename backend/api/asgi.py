@@ -10,9 +10,9 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 
 import os
 
-from channels.auth import AuthMiddlewareStack
+# from channels.auth import AuthMiddlewareStack # <-- ZAKOMENTOWANO TĘ LINIĘ
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.security.websocket import AllowedHostsOriginValidator
+# from channels.security.websocket import AllowedHostsOriginValidator # <-- ZAKOMENTOWANO TĘ LINIĘ
 from django.core.asgi import get_asgi_application
 
 from chat import routing # Właśnie ten import pozwoli nam podłączyć routing chatu
@@ -26,11 +26,8 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     
     # Żądania WebSocket (czyli te z chatu) będą obsługiwane przez Django Channels
-    "websocket": AllowedHostsOriginValidator( # Opcjonalnie: zabezpiecza przed połączeniami z nieautoryzowanych domen
-        AuthMiddlewareStack( # Ważne: pozwala na dostęp do danych użytkownika (np. czy zalogowany) w WebSocketach
-            URLRouter(
-                routing.websocket_urlpatterns # Tutaj Django Channels szuka wzorców URL dla WebSocketów
-            )
-        )
+    # Usunięto AllowedHostsOriginValidator i AuthMiddlewareStack tymczasowo w celach diagnostycznych
+    "websocket": URLRouter( # <-- Usunięto AuthMiddlewareStack tymczasowo
+        routing.websocket_urlpatterns # Tutaj Django Channels szuka wzorców URL dla WebSocketów
     ),
 })
