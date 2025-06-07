@@ -3,15 +3,15 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '../store/AuthContext'; // <-- Zmieniono import na useAuth (upewnij się, że ścieżka jest poprawna, zakładam '../store/AuthContext')
+import { useAuth } from '../store/AuthContext'; // <-- Upewnij się, że ścieżka jest poprawna
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     // Używamy useAuth hooka do pobierania wartości kontekstu
-    const { user, logout, loading } = useAuth(); // <-- Zmieniono na 'loading'
+    const { user, logout, loading } = useAuth();
 
-    // Zmieniono logikę isLoggedIn na bezpośrednie sprawdzenie 'user'
-    const isLoggedIn = !!user; // Użytkownik jest zalogowany, jeśli obiekt 'user' istnieje
+    // Użytkownik jest zalogowany, jeśli obiekt 'user' istnieje
+    const isLoggedIn = !!user;
     const isAdminOrStaff = isLoggedIn && (user?.is_superuser || user?.is_staff);
 
     const handleLogout = async () => {
@@ -37,8 +37,9 @@ function Navbar() {
                 </div>
 
                 <div className="hidden md:flex space-x-4">
-                    <Link href="#" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
-                                             dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link1</Link>
+                    {/* ZMIENIONY LINK: Link1 na Book */}
+                    <Link href="/book" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
+                                             dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Book</Link>
                     <Link href="/chat" className="text-gray-100 ring ring-gray-600 rounded py-2 px-8 md:py-1 md:px-4 lg:py-2 lg:px-8 hover:bg-gray-700 hover:text-white hover:ring-gray-700 hover:font-bold md:text-sm lg:text-base
                                              dark:text-gray-700 dark:ring-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Chat</Link>
                     {isAdminOrStaff && (
@@ -71,7 +72,7 @@ function Navbar() {
                         <button
                             onClick={handleLogout}
                             className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 md:py-1 md:px-2 lg:py-2 lg:px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hidden md:inline md:text-sm lg:text-base
-                                             dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
+                                                     dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
                             disabled={loading}
                         >
                             Log out
@@ -107,13 +108,14 @@ function Navbar() {
                             </svg>
                         </button>
                     </div>
-                    <Link href="#" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
-                                             dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Link1</Link>
+                    {/* ZMIENIONY LINK: Link1 na Book w menu mobilnym */}
+                    <Link href="/book" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
+                                             dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Book</Link>
                     <Link href="/chat" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
                                              dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Chat</Link>
                     {isAdminOrStaff && (
                         <Link href="/blog/add" onClick={() => setIsMenuOpen(false)} className="block py-2 px-4 rounded text-center ring ring-gray-600 text-gray-100 mb-2 hover:bg-gray-700 hover:text-white hover:ring-gray-700
-                                                             dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Add Article</Link>
+                                                         dark:ring-gray-400 dark:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:hover:ring-gray-800">Add Article</Link>
                     )}
                     {loading && <span className="text-gray-300 block py-2 text-center md:text-sm dark:text-gray-400">Loading...</span>}
                     {isLoggedIn && user ? (
@@ -126,7 +128,7 @@ function Navbar() {
                             <button
                                 onClick={handleLogout}
                                 className="bg-red-500 my-4 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full text-center md:text-sm
-                                                     dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
+                                                         dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
                                 disabled={loading}
                             >
                                 Log out
@@ -138,7 +140,7 @@ function Navbar() {
                                 <Link
                                     href="/login"
                                     className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm
-                                                         dark:bg-green-700 dark:hover:bg-green-600 dark:text-white"
+                                                                 dark:bg-green-700 dark:hover:bg-green-600 dark:text-white"
                                 >
                                     Log in
                                 </Link>
@@ -147,7 +149,7 @@ function Navbar() {
                                 <Link
                                     href="/register"
                                     className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed w-full md:text-sm
-                                                         dark:bg-yellow-700 dark:hover:bg-yellow-600 dark:text-white"
+                                                                 dark:bg-yellow-700 dark:hover:bg-yellow-600 dark:text-white"
                                 >
                                     Register
                                 </Link>
