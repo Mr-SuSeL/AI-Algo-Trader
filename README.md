@@ -13,9 +13,23 @@ The application consists of a **frontend** built with Next.js and a **backend** 
 
 * **User Authentication:** Secure user registration and login using JWT tokens stored in HTTP-only cookies.
 * **Blog Functionality:**
-  * View articles.
-  * Create, Read, Update, and Delete (CRUD) operations for articles.
+    * View articles.
+    * Create, Read, Update, and Delete (CRUD) operations for articles.
 * **Live Chatroom:** **Fully functional real-time communication** for community interaction, powered by **Django Channels**, **Daphne**, and a **Redis Channel Layer**. Users can exchange messages in designated chat rooms.
+    * **Available Chat Rooms:**
+        * **Trading**
+        * **Algorithmic Trading**
+        * **Quantitative Trading**
+        * **High Frequency Trading**
+        * **Machine Learning**
+        * **Cloud Solutions**
+        * **TradingView & PineScript**
+        * **MetaTrader & MQL**
+        * **Futures**
+        * **Options**
+        * **Cryptocurrency Trading**
+        * **C++ Programming**
+        * **Python Programming**
 * **AI Integration:** (Implied by the name) Features related to AI-driven trading analysis.
 * **Responsive Frontend:** User interface built with React and Tailwind CSS for a modern and responsive experience across devices.
 
@@ -105,3 +119,18 @@ We have successfully implemented the core chatroom functionality. The next steps
 * **WebSocket Authentication:** Implementing a custom authentication middleware for Django Channels to securely link WebSocket connections to authenticated users, likely using JWT tokens.
 * **Production Deployment:** Enhancing the Docker setup to include a production-ready web server (e.g., Nginx) to serve the frontend, handle static files, proxy HTTP requests to Django (Gunicorn/Uvicorn), and proxy WebSocket connections to Daphne.
 * **Additional Chat Features:** Exploring features like displaying active users, private messaging, etc.
+* **Chat History Persistence:** Implementing a mechanism to store chat messages in a database (e.g., PostgreSQL) for historical access, ensuring that past conversations are preserved and loaded when users join a room. This could involve using Django ORM to save messages.
+* **Frontend State Management Improvement:** Transitioning from React Context API to a more robust state management solution like **Redux (or Redux Toolkit)** for global application state.
+* **AI-Driven Chat Features:** Integrating an AI model (e.g., through a separate service or API) to provide functionalities like:
+    * **Summarization of chat conversations** (e.g., daily summaries for each room).
+    * **Automated content moderation** to detect and flag inappropriate messages.
+    * **Answer generation** for frequently asked questions or technical queries within specific trading rooms, utilizing a knowledge base.
+    * **Sentiment analysis** of chat messages to gauge community mood on certain topics or market movements.
+* **Integration with Trading APIs:** Connecting the platform with live trading APIs (e.g., Alpaca, Interactive Brokers) to:
+    * Display real-time market data directly within relevant chat rooms.
+    * Allow users to trigger simulated or even live trades (with appropriate disclaimers and security) based on discussions or AI analysis.
+* **Notifications System:** Implementing push notifications or in-app alerts for new messages, mentions, or specific market events.
+
+---
+
+Mam nadzieję, że ta rozszerzona sekcja "Further Development" lepiej oddaje wszystkie pomysły, które przewinęły się przez nasze rozmowy!
