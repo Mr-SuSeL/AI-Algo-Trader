@@ -1,20 +1,20 @@
 // C:\AI-Algo-Trader\frontend\app\login\page.js
-'use client'; // Ten komponent musi być komponentem klienckim
+'use client'; // This component must be a client component
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/store/AuthContext'; // Używamy aliasu '@' dla ścieżki do store
-import { useRouter } from 'next/navigation'; // Poprawiony import useRouter
+import { useAuth } from '@/store/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, user, loading } = useAuth(); // Używamy useAuth hooka
-  const router = useRouter(); // Używamy standardowo zaimportowanego useRouter
+  const { login, user, loading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    // Jeśli użytkownik jest już zalogowany i loading się zakończył, przekieruj
+    // If the user is already logged in and loading is complete, redirect
     if (user && !loading) {
       router.push('/');
     }
@@ -26,23 +26,23 @@ export default function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err.message || 'Logowanie nie powiodło się. Sprawdź swoje dane.');
+      setError(err.message || 'Login failed. Please check your credentials.');
     }
   };
 
   if (loading || user) {
-    // Jeśli trwa ładowanie lub użytkownik jest już zalogowany, wyświetl komunikat ładowania/przekierowania
+    // If loading or the user is already logged in, display a loading/redirecting message
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <p className="text-gray-800">Ładowanie lub przekierowanie...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-700"> {/* Unified background */}
+        <p className="text-white">Loading or redirecting...</p> {/* Changed text color for contrast */}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-700"> {/* Unified background */}
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Zaloguj się</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Login</h2> {/* Translated title */}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
@@ -59,7 +59,7 @@ export default function LoginPage() {
           </div>
           <div className="mb-6">
             <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
-              Hasło:
+              Password:
             </label>
             <input
               type="password"
@@ -76,11 +76,11 @@ export default function LoginPage() {
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             >
-              Zaloguj się
-            </button>
+              Login
+            </button> {/* Translated button text */}
             <Link href="/register" className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
-              Nie masz konta? Zarejestruj się!
-            </Link>
+              Don't have an account? Register!
+            </Link> {/* Translated link text */}
           </div>
         </form>
       </div>
