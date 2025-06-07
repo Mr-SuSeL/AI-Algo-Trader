@@ -1,5 +1,6 @@
 # chat/consumers.py
 import json # Moduł do pracy z danymi JSON
+import datetime # Dodajemy import datetime do generowania timestampów
 
 # Importujemy AsyncWebsocketConsumer z Channels, to jest bazowa klasa do obsługi WebSocketów
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -19,7 +20,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
         print(f"WS: Połączono z {self.channel_name} w pokoju {self.room_name}") # Dodany log
 
-        # TERAZ ODKOMENTOWUJEMY I PRZYWRACAMY DOJŚCIE DO GRUPY W CHANNEL LAYER
         # Dołączamy bieżące połączenie (kanał) do grupy pokoju w Channel Layer (Redis)
         # Dzięki temu wszystkie połączenia w tej samej grupie mogą się ze sobą komunikować
         await self.channel_layer.group_add(
@@ -30,7 +30,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # Ta metoda jest wywoływana, gdy klient rozłącza się z WebSocketem
     async def disconnect(self, close_code):
-        # TERAZ ODKOMENTOWUJEMY I PRZYWRACAMY USUNIĘCIE Z GRUPY W CHANNEL LAYER
         # Usuwamy połączenie z grupy pokoju
         await self.channel_layer.group_discard(
             self.room_group_name,
@@ -44,10 +43,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         username = text_data_json.get("username", "Anonymous") # Pobierz nazwę użytkownika, domyślnie "Anonymous"
+        # Odbieramy timestamp z frontendu. Jeśli frontend go nie wysłał, ustawiamy aktualny czas.
+        timestamp = text_data_json.get("timestamp", datetime.datetime.now().isoformat())
 
-        print(f"WS: Otrzymano od {username}: {message} w pokoju {self.room_name}") # Dodany log
+        print(f"WS: Otrzymano od {username}: {message} (Timestamp: {timestamp}) w pokoju {self.room_name}") # Dodany log
 
-        # TERAZ ODKOMENTOWUJEMY I PRZYWRACAMY WYSYŁANIE WIADOMOŚCI DO GRUPY W CHANNEL LAYER
         # Wysyłamy wiadomość do grupy pokoju w Channel Layer
         # 'type': 'chat.message' oznacza, że Channel Layer wywoła metodę 'chat_message'
         # we wszystkich konsumerach należących do tej grupy
@@ -56,7 +56,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 "type": "chat.message",
                 "message": message,
-                "username": username
+                "username": username,
+                "timestamp": timestamp, # <-- Przekazujemy timestamp dalej
             }
         )
         print(f"WS: Wiadomość '{message}' wysłana do grupy '{self.room_group_name}'") # Dodany log
@@ -66,9 +67,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event["message"]
         username = event["username"]
+        timestamp = event["timestamp"] # <-- Odbieramy timestamp z eventu group_send
 
-        print(f"WS: Wysyłam wiadomość '{message}' od '{username}' do klienta {self.channel_name}") # Dodany log
+        print(f"WS: Wysyłam wiadomość '{message}' od '{username}' (Timestamp: {timestamp}) do klienta {self.channel_name}") # Dodany log
 
         # Wysyłamy wiadomość z powrotem do klienta przez WebSocket
-        await self.send(text_data=json.dumps({"message": message, "username": username}))
-
+        await self.send(text_data=json.dumps({
+            "message": message,
+            "username": username,
+            "timestamp": timestamp # <-- Wysyłamy timestamp do frontendu
+        }))
