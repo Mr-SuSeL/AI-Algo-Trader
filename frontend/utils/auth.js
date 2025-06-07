@@ -1,82 +1,40 @@
 // C:\AI-Algo-Trader\frontend\utils\auth.js
 import axios from "axios";
+import Cookies from 'js-cookie'; // Importuj js-cookie (musisz je zainstalować: npm install js-cookie)
 
-// Upewnij się, że api jest poprawnie zaimportowane z withCredentials: true
-// Jeśli nie masz pliku api.js, możesz usunąć ten import i użyć bezpośrednio axios z withCredentials: true
-const API_BASE_URL = "http://localhost:8000/api"; // Upewnij się, że to jest poprawny adres URL Twojego API Django
+const API_BASE_URL = "http://localhost:8000/api";
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true, // WAŻNE: To sprawia, że ciasteczka są wysyłane z żądaniami CORS
-  headers: {
-    "Content-Type": "application/json",
-  },
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
-
-// --- Funkcja pomocnicza do pobierania ciasteczka ---
+// --- Funkcja pomocnicza do pobierania ciasteczka (teraz używa js-cookie) ---
 export const getCookie = (name) => {
-    if (typeof document === 'undefined') {
-        console.log(`[getCookie] Running in non-browser environment. Returning null for ${name}.`);
-        return null;
-    }
-    console.log(`[getCookie] Looking for cookie: "${name}"`);
-    console.log(`[getCookie] All cookies: "${document.cookie}"`); // Dodane logowanie wszystkich ciasteczek
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            let cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                console.log(`[getCookie] Found cookie "${name}". Value: "${cookieValue}"`);
-                break;
-            }
-        }
-    }
-    console.log(`[getCookie] Returning for "${name}": ${cookieValue}`);
+    // js-cookie automatycznie obsługuje środowiska przeglądarkowe/nieprzeglądarkowe
+    const cookieValue = Cookies.get(name);
+    // console.log(`[getCookie] Looking for cookie: "${name}". Value: "${cookieValue}"`);
     return cookieValue;
 };
 
-// --- NOWA FUNKCJA clearAuthCookies (Zastępuje deleteCookie i deleteAuthCookies) ---
+// --- NOWA UPROSZCZONA FUNKCJA clearAuthCookies (Używa js-cookie) ---
 export function clearAuthCookies() {
     console.log('[clearAuthCookies] Rozpoczynam usuwanie ciasteczek autoryzacji.');
-    const cookiesToClear = ['access_token', 'refresh_token', 'csrftoken']; // Dodano csrftoken dla pewności
-    const domainsToClear = [window.location.hostname, '']; // 'localhost' i pusty string dla domyślnego
-    const pathsToClear = ['/', window.location.pathname, '/api', '/api/users', '/api/users/login']; // Często używane ścieżki
-    const secureOptions = [false, true]; // Spróbuj bez secure i z secure
-    const samesiteOptions = ['Lax', 'Strict', 'None'];
-
-    cookiesToClear.forEach(name => {
-        domainsToClear.forEach(domain => {
-            pathsToClear.forEach(path => {
-                secureOptions.forEach(secure => {
-                    samesiteOptions.forEach(samesite => {
-                        let cookieString = `${name}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-                        if (domain) {
-                            cookieString += ` domain=${domain};`;
-                        }
-                        if (secure) {
-                            cookieString += ` secure;`;
-                        }
-                        if (samesite) {
-                            cookieString += ` samesite=${samesite};`;
-                        }
-                        document.cookie = cookieString;
-                    });
-                });
-            });
-        });
-    });
-    console.log('[clearAuthCookies] Zakończono próbę usunięcia ciasteczek.');
-    console.log('[clearAuthCookies] Stan ciasteczek po próbie czyszczenia:', document.cookie);
+    Cookies.remove('access_token', { path: '/' });
+    Cookies.remove('refresh_token', { path: '/' });
+    Cookies.remove('csrftoken', { path: '/' }); // Usuń również CSRF token jeśli go używasz
+    console.log('[clearAuthCookies] Zakończono usuwanie ciasteczek.');
+    // console.log('[clearAuthCookies] Stan ciasteczek po próbie czyszczenia:', document.cookie); // Możesz odkomentować do debugowania
 }
 
+// --- ZMODYFIKOWANE FUNKCJE (Używają nowej logiki clearAuthCookies i poprawek) ---
 
-// --- ZMODYFIKOWANE FUNKCJE (Używają nowej logiki clearAuthCookies) ---
 export const registerUser = async (email, username, password) => {
     try {
-        const response = await api.post(`/users/register/`, { email, username, password }); // Używam 'api'
+        const response = await api.post(`/users/register/`, { email, username, password });
         return response.data;
     } catch (e) {
         console.error("Szczegóły błędu w utils/auth.js (registerUser):", e.response?.data || e.message || e);
@@ -87,8 +45,10 @@ export const registerUser = async (email, username, password) => {
 export const loginUser = async (email, password) => {
     try {
         console.log("[loginUser] Starting login process.");
-        const response = await api.post(`/users/login/`, { email, password }); // Używam 'api'
+        const response = await api.post(`/users/login/`, { email, password });
         console.log("[loginUser] Login API call successful. Returning data.");
+        // WAŻNE: Backend powinien ustawiać ciasteczka access_token i refresh_token po udanym logowaniu.
+        // Jeśli tak nie jest, musisz to zrobić tutaj, np. Cookies.set('access_token', response.data.access);
         return response.data;
     } catch (e) {
         console.error("Szczegóły błędu w utils/auth.js (loginUser):", e.response?.data || e.message || e);
@@ -98,19 +58,14 @@ export const loginUser = async (email, password) => {
 
 export const logoutUser = async () => {
     try {
-        // Backend powinien usunąć refresh token z listy zblacklistowanych (jeśli jest taka logika)
-        // Jeśli nie, to i tak frontend usunie ciasteczka
-        const response = await api.post(`/users/logout/`, null); // Używam 'api'
+        const response = await api.post(`/users/logout/`, null);
         console.log("Backend logout API call successful (status:", response.status, ").");
-        // clearAuthCookies(); // To wywołanie przenosimy do AuthContext.js dla centralizacji
-
+        // clearAuthCookies(); // To wywołanie jest centralizowane w AuthContext.js
         console.log("Frontend: Backendowa część wylogowania zakończona.");
         return response.data;
     } catch (e) {
         console.error("Szczegóły błędu w utils/auth.js (logoutUser):", e.response?.data || e.message || e);
-        // clearAuthCookies(); // To wywołanie przenosimy do AuthContext.js dla centralizacji
         console.warn("Frontend: Błąd API wylogowania. Przekazuję dalej.");
-
         if (axios.isAxiosError(e) && e.response && e.response.status >= 200 && e.response.status < 300) {
             console.warn("Logout API zwróciło sukces (2xx), ale Axios zgłosił błąd. To niezwykłe.");
             return e.response.data || { success: true };
@@ -119,7 +74,6 @@ export const logoutUser = async () => {
     }
 }
 
-// Funkcja do pobierania danych aktualnie zalogowanego użytkownika
 export const fetchCurrentUser = async () => {
     const accessToken = getCookie('access_token');
     if (!accessToken) {
@@ -128,8 +82,7 @@ export const fetchCurrentUser = async () => {
     }
 
     try {
-        // Zmieniono endpoint z /users/me/ na /users/user-info/
-        const response = await api.get(`/users/user-info/`, { 
+        const response = await api.get(`/users/user-info/`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -138,23 +91,14 @@ export const fetchCurrentUser = async () => {
         return response.data;
     } catch (error) {
         console.error("Błąd w utils/auth.js (fetchCurrentUser):", error.response?.data || error.message);
-        // Jeśli token dostępu jest nieprawidłowy/wygasły, spróbuj odświeżyć
+        // Ważne: NIE próbujemy tutaj odświeżać tokena rekurencyjnie!
+        // To jest odpowiedzialność AuthContext, aby podjąć decyzję o odświeżeniu
+        // lub wylogowaniu po nieudanym fetchCurrentUser.
         if (error.response?.status === 401 || error.response?.status === 403) {
-            console.log("Access token nieprawidłowy/wygasły. Próbuję odświeżyć token.");
-            try {
-                await refreshToken(); // Spróbuj odświeżyć token
-                // Po udanym odświeżeniu, tokeny w ciasteczkach będą aktualne.
-                // Spróbuj pobrać użytkownika ponownie (z nowymi tokenami)
-                const refreshedUser = await fetchCurrentUser();
-                return refreshedUser;
-            } catch (refreshError) {
-                console.error("Nie udało się odświeżyć tokena:", refreshError);
-                // clearAuthCookies(); // Czyszczenie przeniesione do AuthContext.js
-                return null;
-            }
+            console.log("Access token nieprawidłowy/wygasły. fetchCurrentUser zwraca null.");
+            // throw new Error("Token expired or invalid"); // Możesz rzucić błąd, jeśli AuthContext ma go obsłużyć
         }
-        // clearAuthCookies(); // Czyszczenie przeniesione do AuthContext.js
-        return null;
+        return null; // Zwróć null, aby AuthContext mógł podjąć decyzję.
     }
 }
 
@@ -166,7 +110,9 @@ export const refreshToken = async () => {
     }
 
     try {
-        const response = await api.post(`/users/refresh/`, { refresh: currentRefreshToken }); // Używam 'api'
+        const response = await api.post(`/users/refresh/`, { refresh: currentRefreshToken });
+        // WAŻNE: Backend powinien ustawiać nowe ciasteczka access_token i refresh_token po udanym odświeżeniu.
+        // Jeśli tak nie jest, musisz to zrobić tutaj, np. Cookies.set('access_token', response.data.access);
         return response.data;
     } catch (e) {
         console.warn("Szczegóły błędu w utils/auth.js (refreshToken):", e.response?.data || e.message || e);
