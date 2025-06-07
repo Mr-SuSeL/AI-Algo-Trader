@@ -1,71 +1,75 @@
 // C:\AI-Algo-Trader\frontend\app\chat\page.js
-'use client'; // This component must be a client component to use hooks and WebSocket API
+'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuth } from '@/store/AuthContext'; // Import useAuth hook
-import Navbar from '@/components/Navbar'; // Assuming Navbar is in components folder
-import Footer from '@/components/Footer'; // Assuming Footer is in components folder
+import { useAuth } from '@/store/AuthContext';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
-  const [roomName, setRoomName] = useState('general'); // Default chat room
-  const [nickname, setNickname] = useState(''); // User's nickname for chat
-  const ws = useRef(null); // useRef to persist WebSocket instance across renders
-  const reconnectAttempts = useRef(0); // Track reconnection attempts
-  const maxReconnectAttempts = 5; // Max attempts before giving up
-  const reconnectDelay = 2000; // 2 seconds delay between reconnect attempts
+  // Ustawienie początkowej nazwy pokoju na "trading" lub inną, która pasuje do nowych nazw
+  const [roomName, setRoomName] = useState('trading');
+  const [nickname, setNickname] = useState('');
+  const ws = useRef(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
+  const reconnectDelay = 2000;
 
-  const { user, loading } = useAuth(); // Get user and loading state from AuthContext
-  const messagesEndRef = useRef(null); // Ref for scrolling to the latest message
+  const { user, loading } = useAuth();
+  const messagesEndRef = useRef(null);
 
-  // State for toast notifications
-  const [toast, setToast] = useState(null); // { message: '...', type: 'success' | 'error' | 'info' | 'warning' }
+  const [toast, setToast] = useState(null);
 
-  // --- Utility functions ---
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Callback to show toast messages
   const showToast = useCallback((message, type = 'info', duration = 3000) => {
     setToast({ message, type });
     const timer = setTimeout(() => setToast(null), duration);
-    return () => clearTimeout(timer); // Cleanup timer if component unmounts
+    return () => clearTimeout(timer);
   }, []);
 
-  // Effect to set initial nickname when user data is loaded
-  // This runs once when user data is ready
   useEffect(() => {
-    if (user && !loading && !nickname) { // Only set if user is loaded and nickname isn't already set by user
+    if (user && !loading && !nickname) {
       setNickname(user.username || user.email || 'Anonymous');
       console.log('Initial nickname set:', user.username || user.email || 'Anonymous');
     }
-  }, [user, loading]); // Depend only on user and loading, not on nickname itself
+  }, [user, loading]);
 
-  // --- WebSocket Connection Logic ---
+  // WebSocket Connection Logic
   const connectWebSocket = useCallback(() => {
-    // Prevent multiple connections
-    if (ws.current) {
-        console.log('connectWebSocket: Already connected, skipping.');
-        return;
+    // If a connection already exists, and it's for the current room, do nothing.
+    // This prevents creating duplicate connections for the same room.
+    if (ws.current && ws.current.url.includes(`/ws/chat/${roomName}/`)) {
+      console.log(`connectWebSocket: Already connected to ${roomName}, skipping.`);
+      return;
     }
 
-    // Only attempt to connect if the user is logged in and not currently loading auth data
-    // AND nickname is set (important for initial connection validity)
+    // Explicitly close any existing connection before opening a new one for a different room
+    if (ws.current) {
+        console.log(`connectWebSocket: Closing existing WebSocket for room ${ws.current.url.split('/').slice(-2, -1)[0]} to connect to ${roomName}.`);
+        ws.current.close(1000, 'Room change'); // Use 1000 for normal closure
+        ws.current = null; // Clear the ref immediately to ensure onopen won't be blocked
+    }
+
+
     if (user && !loading && nickname) {
       console.log(`Attempting WebSocket connection: ws://localhost:8001/ws/chat/${roomName}/ (Attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
 
       const newWs = new WebSocket(`ws://localhost:8001/ws/chat/${roomName}/`);
 
       newWs.onopen = () => {
-        console.log('Connected to WebSocket!');
-        reconnectAttempts.current = 0; // Reset attempts on successful connection
+        console.log(`Connected to WebSocket for room: ${roomName}!`);
+        reconnectAttempts.current = 0;
 
-        // Show toast for nickname if it's the first connection for this user in this room
         if (user && !localStorage.getItem(`nickname_toast_shown_${user.id}_${roomName}`)) {
-            showToast(`Welcome to "${roomName.charAt(0).toUpperCase() + roomName.slice(1)}" chat, ${nickname}! You can change your nickname below.`, 'info', 7000);
+            // Format roomName for display in toast
+            const displayRoomName = roomName.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ').replace(/&/, ' & ');
+            showToast(`Welcome to "${displayRoomName}" chat, ${nickname}! You can change your nickname below.`, 'info', 7000);
             localStorage.setItem(`nickname_toast_shown_${user.id}_${roomName}`, 'true');
         }
       };
@@ -78,17 +82,19 @@ export default function ChatPage() {
 
       newWs.onclose = (event) => {
         console.log(`Disconnected from WebSocket. Code: ${event.code}, Reason: ${event.reason || 'None'}.`);
-        ws.current = null; // Clear the WebSocket instance
+        if (ws.current === newWs) { // Only clear if this was the active WebSocket
+            ws.current = null;
+        }
+
         if (event.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) { // 1000 is normal closure
           reconnectAttempts.current++;
-          showToast(`WebSocket disconnected. Reconnecting in ${reconnectDelay / 1000}s... (Attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`, 'error');
+          showToast(`WebSocket disconnected. Reconnecting to ${roomName} in ${reconnectDelay / 1000}s... (Attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`, 'error');
           setTimeout(connectWebSocket, reconnectDelay);
         } else if (event.code === 4001) {
             console.log('Authentication failed, not reconnecting.');
             showToast('Authentication failed. Please log in again.', 'error');
         } else if (event.code === 1000) {
             console.log('WebSocket closed normally.');
-            // showToast('Disconnected from chat.', 'info'); // Optional toast for normal closure
         } else {
             showToast('WebSocket connection error. Please refresh the page.', 'error');
         }
@@ -96,53 +102,61 @@ export default function ChatPage() {
 
       newWs.onerror = (error) => {
         console.error('WebSocket Error:', error);
-        newWs.close(); // Attempt to close the socket to trigger onclose logic
+        // Do not close here, let onclose handle it to prevent double logging or unexpected state.
+        // newWs.close();
       };
 
-      ws.current = newWs; // Store the WebSocket instance
+      ws.current = newWs;
     } else if (!user && !loading) {
         console.log('Connect WebSocket: User not authenticated, skipping connection.');
-        showToast('Please log in to use the chat.', 'info'); // Toast for non-logged-in users
+        // showToast('Please log in to use the chat.', 'info'); // This might be annoying if logged out frequently
     } else if (user && loading) {
         console.log('Connect WebSocket: User status still loading, skipping connection for now.');
     } else if (!nickname && user && !loading) {
-        // This case is handled by the primary useEffect which waits for nickname to be set
         console.log('Connect WebSocket: Nickname not yet set, waiting.');
     }
-  }, [roomName, user, loading, nickname, showToast]); // IMPORTANT: Keep nickname here for the initial connection condition
+  }, [roomName, user, loading, nickname, showToast]);
+
 
   // Effect to manage WebSocket connection based on roomName and user authentication.
-  // This useEffect focuses on establishing/re-establishing the connection when room/user/loading status changes.
+  // This useEffect now explicitly ensures connection or re-connection.
   useEffect(() => {
-    // This part ensures a clean state before attempting connection or on unmount/room change
+    // This cleanup function is crucial: it will run when dependencies change or component unmounts.
+    // It closes the *currently active* WebSocket connection.
     return () => {
       if (ws.current) {
         console.log('Cleanup return: Closing WebSocket.');
-        ws.current.close();
+        ws.current.close(1000, 'Component unmount or dependency change');
         ws.current = null;
       }
     };
-  }, [roomName, user, loading]); // Dependencies for cleanup: only room, user, loading
+  }, []); // Empty dependency array means this cleanup runs only on component unmount.
+          // The actual connection/reconnection logic is now handled by connectWebSocket
+          // and triggered by the separate useEffect below.
 
-  // Effect to initiate or re-initiate WebSocket connection based on essential dependencies.
-  // This effect runs after nickname is set and when room/user/loading status changes.
+
   useEffect(() => {
-    // Only connect if user, nickname, and roomName are ready
+    // This effect triggers the connection when roomName, user, loading, or nickname changes.
+    // connectWebSocket itself contains logic to prevent duplicate connections.
     if (user && !loading && nickname) {
         // Clear localStorage item for nickname toast on room change to show it again if needed
         localStorage.removeItem(`nickname_toast_shown_${user.id}_${roomName}`);
-        connectWebSocket(); // Attempt to connect
+        connectWebSocket();
+    } else if (!user && !loading) {
+        // If user logs out, ensure WebSocket is closed
+        if (ws.current) {
+            ws.current.close(1000, 'User logged out');
+            ws.current = null;
+        }
     }
-  }, [roomName, user, loading, nickname, connectWebSocket]); // Include nickname here to trigger connection when it's ready
+  }, [roomName, user, loading, nickname, connectWebSocket]);
 
-  // Effect to scroll to bottom when messages update
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // --- Message Handling ---
   const sendMessage = () => {
-    // Condition remains the same: WS must be open, message and nickname not empty
     if (ws.current && ws.current.readyState === WebSocket.OPEN && messageInput.trim() !== '' && nickname.trim() !== '') {
       const messageData = {
         message: messageInput.trim(),
@@ -150,12 +164,12 @@ export default function ChatPage() {
         timestamp: new Date().toISOString(),
       };
       ws.current.send(JSON.stringify(messageData));
-      setMessageInput(''); // Clear input after sending
+      setMessageInput('');
     } else {
       let warnMessage = '';
       let toastType = 'warning';
       if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
-        warnMessage = 'Chat connection not open.';
+        warnMessage = 'Chat connection not open. Please wait or try refreshing.';
         toastType = 'error';
       } else if (messageInput.trim() === '') {
         warnMessage = 'Message cannot be empty.';
@@ -169,20 +183,39 @@ export default function ChatPage() {
     }
   };
 
-  const handleRoomChange = (newRoom) => {
-    // When room changes, we need to explicitly close the current WS connection
-    // to force a new one for the new room.
-    if (ws.current) {
-      console.log('handleRoomChange: Closing WebSocket for room change.');
-      ws.current.close();
-      ws.current = null; // Important: Clear the ref
-    }
-    setRoomName(newRoom);
-    setMessages([]); // Clear messages when room changes
-    // The useEffect for connection will then pick up the new roomName and re-connect
-  };
+  const handleRoomChange = useCallback(async (newRoomSlug) => {
+    if (roomName === newRoomSlug) return; // Don't do anything if trying to switch to the same room
 
-  // --- Render Logic ---
+    console.log(`handleRoomChange: Attempting to switch from ${roomName} to ${newRoomSlug}.`);
+
+    // Explicitly close the current WebSocket connection if it exists
+    if (ws.current) {
+      console.log('handleRoomChange: Closing current WebSocket before changing room.');
+      // Create a Promise that resolves when the WebSocket is actually closed
+      const closePromise = new Promise((resolve) => {
+        const currentWs = ws.current;
+        currentWs.onclose = (event) => {
+          console.log(`WebSocket for room ${currentWs.url.split('/').slice(-2, -1)[0]} closed successfully. Code: ${event.code}, Reason: ${event.reason || 'None'}`);
+          // Ensure ws.current is cleared *after* this onclose fires for the current socket
+          if (ws.current === currentWs) {
+              ws.current = null; // Clear the ref
+          }
+          resolve(); // Resolve the promise
+        };
+        currentWs.close(1000, 'Room change initiated'); // Request closure
+      });
+      // Wait for the current WebSocket to close before proceeding
+      await closePromise;
+    }
+
+    setRoomName(newRoomSlug); // Update roomName state
+    setMessages([]); // Clear messages when room changes
+    reconnectAttempts.current = 0; // Reset reconnect attempts for the new room
+    // The useEffect that depends on roomName will then trigger connectWebSocket.
+    console.log(`handleRoomChange: Room set to ${newRoomSlug}.`);
+  }, [roomName]); // Only re-create if roomName changes
+
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
@@ -203,6 +236,38 @@ export default function ChatPage() {
     );
   }
 
+  // Definiujemy mapowanie wyświetlanych nazw pokoi na slug (URL-friendly)
+  const roomDisplayNames = [
+    'Trading',
+    'Algorithmic Trading',
+    'Quantitative Trading',
+    'High Frequency Trading',
+    'Machine Learning',
+    'Cloud Solutions',
+    'TradingView & PineScript',
+    'MetaTrader & MQL',
+    'Futures',
+    'Options',
+    'Cryptocurrency Trading',
+    'C++ Programming',
+    'Python Programming'
+  ];
+
+  // Funkcja pomocnicza do konwersji display name na slug
+  const getRoomSlug = (displayName) => {
+    return displayName.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_');
+  };
+
+  // Funkcja pomocnicza do konwersji slug na display name
+  const getDisplayRoomName = (slug) => {
+    // Odwracamy proces: replace '_' with ' ', then capitalize each word
+    let displayName = slug.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    // Handle the '&' case
+    if (displayName.includes('tradingview')) displayName = displayName.replace('tradingview_&_pinescript', 'TradingView & PineScript');
+    if (displayName.includes('metatrader')) displayName = displayName.replace('metatrader_&_mql', 'MetaTrader & MQL');
+    return displayName;
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <Navbar />
@@ -211,17 +276,17 @@ export default function ChatPage() {
         <aside className="w-full md:w-1/4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
           <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Chat Rooms</h2>
           <ul>
-            {['general', 'trading', 'technical', 'management'].map((room) => (
+            {roomDisplayNames.map((room) => (
               <li key={room} className="mb-2">
                 <button
-                  onClick={() => handleRoomChange(room)}
+                  onClick={() => handleRoomChange(getRoomSlug(room))}
                   className={`w-full text-left py-2 px-3 rounded-md transition duration-200
-                                ${roomName === room
+                                ${roomName === getRoomSlug(room)
                                   ? 'bg-blue-500 text-white'
                                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
                                 }`}
                 >
-                  {room.charAt(0).toUpperCase() + room.slice(1)} {/* Capitalize first letter */}
+                  {room} {/* Wyświetlamy oryginalną, czytelną nazwę */}
                 </button>
               </li>
             ))}
@@ -231,7 +296,7 @@ export default function ChatPage() {
         {/* Main Chat Area */}
         <section className="flex-grow bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col p-4">
           <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Current Room: {roomName.charAt(0).toUpperCase() + roomName.slice(1)}
+            Current Room: {getDisplayRoomName(roomName)}
           </h2>
 
           {/* Messages Display */}
@@ -272,6 +337,7 @@ export default function ChatPage() {
             <button
               onClick={sendMessage}
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              // The button is enabled if WS is open, message not empty, and nickname not empty.
               disabled={!ws.current || ws.current.readyState !== WebSocket.OPEN || messageInput.trim() === '' || nickname.trim() === ''}
             >
               Send
